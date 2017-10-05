@@ -30,19 +30,19 @@ public class Broker {
 		}
 		reader.close();
 		reader=new Scanner(new FileReader(fieldfile));
-		String data []= new String[lines];
-		data[0] = reader.nextLine();
-		data[0] = data[0].replaceAll("\\s+", " ");
-		int[] splitted = Arrays.stream(data[0].split(" ")).mapToInt(Integer::parseInt).toArray();
+		String data;
+		data = reader.nextLine();
+		data = data.replaceAll("\\s+", " ");
+		int[] splitted = Arrays.stream(data.split(" ")).mapToInt(Integer::parseInt).toArray();
 		for (int i=0; i<6; i++) {
 			infoarray[i] = splitted[i];
 		}
-		for (int i=1; i<lines; i ++) {
-			data[i] = reader.nextLine();
-			data[i] = data[i].replaceAll("\\s+", " ");
-			splitted = Arrays.stream(data[i].split(" ")).mapToInt(Integer::parseInt).toArray();
+		for (int i=0; i<lines; i ++) {
+			data = reader.nextLine();
+			data = data.replaceAll("\\s+", " ");
+			splitted = Arrays.stream(data.split(" ")).mapToInt(Integer::parseInt).toArray();
 			for (int j=0; j<lines; j++) {
-				fieldarray [i-1][j] = splitted[1];
+				fieldarray [i][j] = splitted[j];
 			}
 		}
 		oldfilename = filename;
@@ -73,7 +73,7 @@ public class Broker {
 		}
 		for (int i=0; i<fieldarray.length; i++) {
 			for (int j=0; j<fieldarray[i].length; j++) {
-				data[i]+=fieldarray[i][j]+" ";
+				data[i+1]+=fieldarray[i][j]+" ";
 			}
 		}
 		PrintWriter writer = new PrintWriter(newfilename, "UTF-8");
