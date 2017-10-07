@@ -9,17 +9,19 @@ import java.io.*;
  ************************************************************************************************/
 public class Broker {
 	
-	/**************************************************************************************************************
+	/********************************************************************************************
 	 * Method Name: readFile
 	 * Method Description: method whose responsibility is reading the initial state of the problem from a file.
 	 * @param filename: name of the file to read
-	 * @param fieldarray: array that will contain the state of the field after reading it from the file
 	 * @param infoarray: array that will contain the the rest of the information
+	 * @return An array containing the initial state of the field
 	 * @throws FileNotFoundException
-	 *************************************************************************************************************/
-	public static void readFile(String filename, int[][] fieldarray,  int[] infoarray)throws FileNotFoundException{
+	 ********************************************************************************************/
+	public static int[][] readFile(String filename, int[] infoarray)throws FileNotFoundException{
 		int lines=0;
-		int intsplit;
+		int intsplit=0;
+		int totalcells=0;
+		int totalsand=0;
 		File fieldfile = new File(filename);
 		Scanner reader;
 		reader=new Scanner(new FileReader(fieldfile));
@@ -34,23 +36,42 @@ public class Broker {
 		data = data.replaceAll("\\s+", " ");
 		String[] splitted = data.split(" ");
 		for (int i=0; i<6; i++) {
-			intsplit = Integer.parseInt(splitted[i]);
+			try {
+				intsplit = Integer.parseInt(splitted[i]);
+			}catch (Exception e){
+				//throw wrongFormat exception
+			}
 			infoarray[i] = intsplit;
 		}
-		for (int i=0; i<lines; i ++) {
+		if (checkSense(infoarray)) {
+			//throw nonSense exception
+		}
+		int[][] fieldarray = new int[infoarray[5]][infoarray[4]];
+		for (int i=0; i<lines-1; i ++) {
 			data = reader.nextLine();
 			data = data.replaceAll("\\s+", " ");
 			splitted = data.split(" ");
 			if (splitted[0]!= "") {
-				//throw exception. Format: <_a_b_c>
+				//throw wrongFormat exception
 			}else {
 				for (int j=0; j<splitted.length; j++) {
-					intsplit = Integer.parseInt(splitted[j+1]);
+					try {
+						intsplit = Integer.parseInt(splitted[j+1]);
+					}catch (Exception e) {
+						//trhow wrongFormat Exception
+					}
 					fieldarray [i][j] = intsplit;
+					totalsand+=intsplit;
+					totalcells++;
 				}
 			}
 		}
+		if (totalsand/totalcells!=infoarray[2]) {
+			System.out.println("Mean of sand not equal to K. The problem won't have any solution. Please, introduce different information on the file");
+			//throw nonSense exception
+		}
 		reader.close();
+		return fieldarray;
 	}
 	
 	/**************************************************************************************************************
@@ -77,6 +98,28 @@ public class Broker {
 			writer.println(data[i]);
 		}
 		writer.close();
+	}
+	
+	/**********************************************************************************************************************************
+	 * Method Name: checkSense
+	 * Method Description: Method whose responsibility is checking whether the information read from the file has sense or not
+	 * @param infoarray: an array containing the information we wish to check
+	 * @return: true if information is correct, false in other case
+	 **********************************************************************************************************************************/
+	private static boolean checkSense(int[] infoarray) {
+		if (infoarray[0]>=infoarray[4]) {
+			System.out.println("Position x of truck cannot be equal or bigger than number of columns. Introduced: "+infoarray[0]+" and "+infoarray[4]);
+			return false;
+		}
+		if (infoarray[1]>=infoarray[5]) {
+			System.out.println("Position y of truck cannot be equal or bigger than number of rows. Introduced: "+infoarray[1]+" and "+infoarray[5]);
+			return false;
+		}
+		if (infoarray[2]>infoarray[3]) {
+			System.out.println("Objective amount of sand K cannot be greater than the MAX amount of sand. Introduced: "+infoarray[2]+ " and "+infoarray[3]);
+			return false;
+		}
+		return true;	
 	}
 	
 }
