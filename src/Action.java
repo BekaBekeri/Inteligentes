@@ -1,8 +1,7 @@
 
 public class Action {
-
-	private int newX;
-	private int newY;
+	
+	private Movement newMove;
 	private int sandN;
 	private int sandS;
 	private int sandW;
@@ -11,16 +10,7 @@ public class Action {
 	public Action(){
 		
 	}
-	public int getNewX() {
-		return newX;
-	}
 	
-	public int getNewY() {
-		return newY;
-	}
-	public void setNewY(int newY) {
-		this.newY = newY;
-	}
 	public int getSandN() {
 		return sandN;
 	}
@@ -44,6 +34,14 @@ public class Action {
 	}
 	public void setSandE(int sandE) {
 		this.sandE = sandE;
+	}
+
+	public Movement getNewMove() {
+		return newMove;
+	}
+
+	public void setNewMove(Movement newMove) {
+		this.newMove = newMove;
 	}
 	
 }
