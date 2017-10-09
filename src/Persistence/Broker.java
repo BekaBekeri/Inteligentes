@@ -42,7 +42,7 @@ public class Broker {
 		}
 		rows = infoarray[5];
 		columns = infoarray[4];
-		int[][] fieldarray = new int[infoarray[5]][infoarray[4]];
+		int[][] fieldarray = new int[rows][columns];
 		for (int i=0; i<rows; i ++) {
 			data = reader.nextLine();
 			data = data.replaceAll("\\s+", " ");
