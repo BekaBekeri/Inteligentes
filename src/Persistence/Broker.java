@@ -18,18 +18,12 @@ public class Broker {
 	 * @throws FileNotFoundException
 	 ********************************************************************************************/
 	public static int[][] readFile(String filename, int[] infoarray)throws FileNotFoundException{
-		int lines=0;
 		int intsplit=0;
 		int totalcells=0;
 		int totalsand=0;
+		int rows=0, columns=0;
 		File fieldfile = new File(filename);
 		Scanner reader;
-		reader=new Scanner(new FileReader(fieldfile));
-		while(reader.hasNext()) {    
-		  lines++;
-		  reader.nextLine();
-		}
-		reader.close();
 		reader=new Scanner(new FileReader(fieldfile));
 		String data;
 		data = reader.nextLine();
@@ -46,19 +40,21 @@ public class Broker {
 		if (checkSense(infoarray)) {
 			//throw nonSense exception
 		}
+		rows = infoarray[5];
+		columns = infoarray[4];
 		int[][] fieldarray = new int[infoarray[5]][infoarray[4]];
-		for (int i=0; i<lines-1; i ++) {
+		for (int i=0; i<rows; i ++) {
 			data = reader.nextLine();
 			data = data.replaceAll("\\s+", " ");
 			splitted = data.split(" ");
 			if (splitted[0]!= "") {
 				//throw wrongFormat exception
 			}else {
-				for (int j=0; j<splitted.length; j++) {
+				for (int j=0; j<columns; j++) {
 					try {
 						intsplit = Integer.parseInt(splitted[j+1]);
 					}catch (Exception e) {
-						//trhow wrongFormat Exception
+						//throw wrongFormat Exception
 					}
 					fieldarray [i][j] = intsplit;
 					totalsand+=intsplit;
@@ -84,12 +80,14 @@ public class Broker {
 	 ***************************************************************************************************************/
 	public static void writeFile(String newfilename, int[][] fieldarray, int[] infoarray) throws IOException{
 		int lines=1+fieldarray.length;
+		int rows=infoarray[5];
+		int columns = infoarray[4];
 		String data[] = new String[lines];
 		for (int i=0; i<infoarray.length; i++) {
 			data[0]+=infoarray[i]+" ";
 		}
-		for (int i=0; i<fieldarray.length; i++) {
-			for (int j=0; j<fieldarray[i].length; j++) {
+		for (int i=0; i<rows; i++) {
+			for (int j=0; j<columns; j++) {
 				data[i+1]+=" "+fieldarray[i][j];
 			}
 		}
