@@ -2,12 +2,21 @@
 public class State {
 	
 	private int [][] field;
+	
 	private int tractorX;
 	private int tractorY;
 	private int mean;
 	private int max;
 	
-	
+	public State(int[][] field, int tractorX, int tractorY, int mean, int max) {
+		super();
+		this.field = field;
+		this.tractorX = tractorX;
+		this.tractorY = tractorY;
+		this.mean = mean;
+		this.max = max;
+	}
+
 	
 	public State() {
 	}

@@ -1,11 +1,23 @@
 
 public class Action {
 	
+
 	private Movement newMove;
 	private int sandN;
 	private int sandS;
 	private int sandW;
 	private int sandE;
+	
+	
+	public Action(Movement newMove, int sandN, int sandE, int sandS, int sandW) {
+		super();
+		this.newMove = newMove;
+		this.sandN = sandN;
+		this.sandS = sandS;
+		this.sandW = sandW;
+		this.sandE = sandE;
+	}
+
 	
 	public Action(){
 		
