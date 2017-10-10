@@ -1,5 +1,8 @@
 package Persistence;
 import java.util.*;
+
+import Exceptions.*;
+
 import java.io.*;
 
 /************************************************************************************************
@@ -15,12 +18,14 @@ public class Broker {
 	 * @param filename: name of the file to read
 	 * @param infoarray: array that will contain the the rest of the information
 	 * @return An array containing the initial state of the field
-	 * @throws FileNotFoundException
+	 * @throws FileNotFoundException: when the file required cannot be found
+	 * @throws wrongDataException: when the information in the file is incorrect 
 	 ********************************************************************************************/
-	public static int[][] readFile(String filename, int[] infoarray)throws FileNotFoundException{
+	public static int[][] readFile(String filename, int[] infoarray)throws FileNotFoundException, wrongDataException{
 		int intsplit=0;
-		int totalcells=0;
-		int totalsand=0;
+		int max;
+		double totalcells=0;
+		double totalsand=0;
 		int rows=0, columns=0;
 		File fieldfile = new File(filename);
 		Scanner reader;
@@ -33,28 +38,30 @@ public class Broker {
 			try {
 				intsplit = Integer.parseInt(splitted[i]);
 			}catch (Exception e){
-				//throw wrongFormat exception
+				throw new wrongDataException(100);
 			}
 			infoarray[i] = intsplit;
 		}
-		if (checkSense(infoarray)) {
-			//throw nonSense exception
-		}
+		hasSense(infoarray);
 		rows = infoarray[5];
 		columns = infoarray[4];
+		max = infoarray[3];
 		int[][] fieldarray = new int[rows][columns];
 		for (int i=0; i<rows; i ++) {
 			data = reader.nextLine();
 			data = data.replaceAll("\\s+", " ");
 			splitted = data.split(" ");
-			if (splitted[0]!= "") {
-				//throw wrongFormat exception
-			}else {
+			if (!(splitted[0].isEmpty())) {
+				throw new wrongDataException(101);
+			}else{
 				for (int j=0; j<columns; j++) {
 					try {
 						intsplit = Integer.parseInt(splitted[j+1]);
 					}catch (Exception e) {
-						//throw wrongFormat Exception
+						throw new wrongDataException(100);
+					}
+					if (intsplit<0 || intsplit>max) {
+						throw new wrongDataException(203);
 					}
 					fieldarray [i][j] = intsplit;
 					totalsand+=intsplit;
@@ -62,9 +69,8 @@ public class Broker {
 				}
 			}
 		}
-		if (totalsand/totalcells!=infoarray[2]) {
-			System.out.println("Mean of sand not equal to K. The problem won't have any solution. Please, introduce different information on the file");
-			//throw nonSense exception
+		if (totalsand/totalcells != (double)infoarray[2]) {
+			throw new wrongDataException(204);
 		}
 		reader.close();
 		return fieldarray;
@@ -76,7 +82,7 @@ public class Broker {
 	 * @param newfilename: name of the file in which the information is going to be stored
 	 * @param fieldarray: array containing the final state of the field
 	 * @param infoarray: array containing the final state of the rest of the information
-	 * @throws IOException
+	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
 	public static void writeFile(String newfilename, int[][] fieldarray, int[] infoarray) throws IOException{
 		int lines=1+fieldarray.length;
@@ -91,6 +97,9 @@ public class Broker {
 				data[i+1]+=" "+fieldarray[i][j];
 			}
 		}
+		for (int i=0; i<data.length; i++) {
+			data[i] = data[i].replaceAll("null", "");
+		}
 		PrintWriter writer = new PrintWriter(newfilename, "UTF-8");
 		for (int i=0; i<data.length;i++){
 			writer.println(data[i]);
@@ -103,21 +112,18 @@ public class Broker {
 	 * Method Description: Method whose responsibility is checking whether the information read from the file has sense or not
 	 * @param infoarray: an array containing the information we wish to check
 	 * @return: true if information is correct, false in other case
+	 * @throws wrongDataException: when the information in the file is incorrect
 	 **********************************************************************************************************************************/
-	private static boolean checkSense(int[] infoarray) {
+	private static void hasSense(int[] infoarray) throws wrongDataException {
 		if (infoarray[0]>=infoarray[4]) {
-			System.out.println("Position x of truck cannot be equal or bigger than number of columns. Introduced: "+infoarray[0]+" and "+infoarray[4]);
-			return false;
+			throw new wrongDataException(200);
 		}
 		if (infoarray[1]>=infoarray[5]) {
-			System.out.println("Position y of truck cannot be equal or bigger than number of rows. Introduced: "+infoarray[1]+" and "+infoarray[5]);
-			return false;
+			throw new wrongDataException(201);
 		}
 		if (infoarray[2]>infoarray[3]) {
-			System.out.println("Objective amount of sand K cannot be greater than the MAX amount of sand. Introduced: "+infoarray[2]+ " and "+infoarray[3]);
-			return false;
-		}
-		return true;	
+			throw new wrongDataException(202);
+		}	
 	}
 	
 }
