@@ -12,15 +12,24 @@ public class Control {
 	
 public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		
+		State initialState = new State();
+		initialState.setTractorX(infoarray[0]);
+		initialState.setTractorY(infoarray[1]);
+		initialState.setMean(infoarray[2]);
+		initialState.setMax(infoarray[3]);
+		initialState.setField(initialField);
+	
 		List<Action> actionList = generateActions(initialState);
+		finalactions = new String[actionList.size()];
 		for(int i = 0; i < actionList.size(); i++){
+			finalactions[i]	= actionList.get(i).toString(initialState); 
 			System.out.println(actionList.get(i).toString(initialState));
 		}
 	
 		Random randomGenerator = new Random();
 		int rnd = randomGenerator.nextInt(actionList.size());
 		State newstate = applyAction(initialState, actionList.get(rnd));
-		
+		finalstate = newstate;
 }
 	
 	//CORRECTO
@@ -221,3 +230,4 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 	}
 	
 }
+
