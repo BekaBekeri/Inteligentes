@@ -2,7 +2,7 @@
 
 Intelligent systems laboratory project for the course 2017/2018
 
-Members:
+Membersof the group (A9):
 
   Beka Bekeri -
 
