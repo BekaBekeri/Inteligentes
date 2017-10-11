@@ -31,10 +31,8 @@ public class Pruebas {
 		}
 		System.out.println(actionList.size());	
 		
-		List<State> stateList = generateStates(actionList, initialState);
-		
-		System.out.println(stateList.size());
-	}
+		State newstate = applyAction(initialState, actionList.get(0));
+		}
 	
 	//CORRECTO
 	public static List<State> generateStates(List<Action> actionList, State state){
@@ -96,42 +94,16 @@ public class Pruebas {
 		    					!((j > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
 		    					!((x > 0) && (state.getTractorX() == state.getField().length - 1)) &&
 		    					!((y > 0) && (state.getTractorY() == 0))){
-	    					
-	    							for( int mov = 0; mov < movementList.size(); mov++){
-	    	    						goOn = true;
-	    								for( int mov2 = 0; mov2 < movementList.size(); mov2++){
-	    									if(i > 0){
-	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + i > state.getMax()){
-	    		    								goOn = false;
-	    		    							}
-	    		    						}
-	    		    						
-	    		    						if(j > 0){
-	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + j > state.getMax()){
-	    		    								goOn = false;
-	    		    							}
-	    		    						}
-	    		    						
-	    		    						if(x > 0){
-	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + x > state.getMax()){
-	    		    								goOn = false;
-	    		    							}
-	    		    						}
-	    		    						
-	    		    						if(y > 0){
-	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + y > state.getMax()){
-	    		    								goOn = false;
-	    		    							}
-	    		    						}
-	    								}
-	    									
-	    								if(goOn){
-		    								Movement m = new Movement(movementList.get(mov).getNewX(),
-		    														  movementList.get(mov).getNewY());
-		    								Action auxAction = new Action(m, i, j, x, y);
-		    								actionList.add(auxAction);
+	    							
+		    					if(isPossibleSand(auxA, state)) {
+		    							for( int mov = 0; mov < movementList.size(); mov++){
+		    								
+			    								Movement m = new Movement(movementList.get(mov).getNewX(),
+			    														  movementList.get(mov).getNewY());
+			    								Action auxAction = new Action(m, i, j, x, y);
+			    								actionList.add(auxAction);
 		    							}
-	    							}		    								
+		    					}		    								
 	    						
 	    					}		
 		    			}	
@@ -213,6 +185,33 @@ public class Pruebas {
 			
 		}
 		return newState;
+	}
+	
+	private static boolean isPossibleSand(int[] sandToMove, State current) {
+		boolean check=true;
+			if (sandToMove[0]>0) {
+				if (current.getPosition(current.getTractorX()-1, current.getTractorY())+sandToMove[0]>current.getMax()){
+					check=false;
+				}
+			}
+			if (sandToMove[1]>0) {
+				if (current.getPosition(current.getTractorX(), current.getTractorY()+1)+sandToMove[1]>current.getMax()){
+					check=false;
+				}
+			}	
+			if (sandToMove[2]>0) {
+				if (current.getPosition(current.getTractorX()+1, current.getTractorY())+sandToMove[2]>current.getMax()){
+					check=false;
+				}
+			}
+			if (sandToMove[3]>0) {
+				if (current.getPosition(current.getTractorX(), current.getTractorY()-1)+sandToMove[3]>current.getMax()){
+					check=false;
+				}
+			}
+			
+		
+		return check;
 	}
 	
 }
