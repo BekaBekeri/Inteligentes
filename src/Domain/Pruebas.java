@@ -14,85 +14,132 @@ public class Pruebas {
 		State initialState = new State(field,
 									   0,
 									   2,
-									   5,
+									   3,
 									   8);
 		
 		List<Action> actionList = generateActions(initialState);
 		
+		System.out.println("------------ACTIONS----------");
 
-		for (int i=0; i<actionList.size(); i++) {
-			System.out.println("Action "+i+": "+actionList.get(i).getSandN()+"N "+ actionList.get(i).getSandS()+ "S "+actionList.get(i).getSandE()+ "E "+actionList.get(i).getSandW()+"W, Movement to: "+actionList.get(i).getNewMove().getNewX()+", "+actionList.get(i).getNewMove().getNewY());
+		for(int i = 0; i < actionList.size(); i++){
+			System.out.println("MX: " + actionList.get(i).getNewMove().getNewX() +
+								" MY: " + actionList.get(i).getNewMove().getNewY() + 
+								" N: " + actionList.get(i).getSandN() + 
+								" E: " + actionList.get(i).getSandE() + 
+								" S: " + actionList.get(i).getSandS() + 
+								" W: " + actionList.get(i).getSandW());
 		}
-		System.out.println();
-		System.out.println(actionList.size());
-		System.out.println();
+		System.out.println(actionList.size());	
 		
+		List<State> stateList = generateStates(actionList, initialState);
+		
+		System.out.println(stateList.size());
+	}
+	
+	//CORRECTO
+	public static List<State> generateStates(List<Action> actionList, State state){
+		
+		List<State> succesorStates = new ArrayList<State>();
+		
+		for(int i = 0; i < actionList.size(); i++){
+			//si x+movx es menor que el borde y si x-movx es mayor que 0
+			if( (actionList.get(i).getNewMove().getNewX() < state.getField().length) &&
+			    (actionList.get(i).getNewMove().getNewX() >= 0) &&
+			    (actionList.get(i).getNewMove().getNewY() < state.getField()[0].length) &&
+			    (actionList.get(i).getNewMove().getNewY() >= 0)){
+				
+				if(state.getPosition(state.getTractorX(), state.getTractorY()) <= actionList.get(i).getSandN() + 
+																				  actionList.get(i).getSandE() + 
+																				  actionList.get(i).getSandS() + 
+																				  actionList.get(i).getSandW()){
+					State auxState = applyAction(state, actionList.get(i));
+					boolean correct = true;												//controla que en cada terreno no haya una cantidad de arena mas grande que max
+					for(int x = 0; x < auxState.getField().length; x++){	
+						for(int y = 0; y < auxState.getField()[0].length; y++){
+							if(auxState.getField()[x][y] > auxState.getMax()){
+								correct = false;
+							}
+						}
+					}
+					if(correct){
+						succesorStates.add(auxState);
+					}
+				}
+			}
+		}
+		return succesorStates;
 	}
 	
 	//CORRECTO
 	public static List<Action> generateActions(State state){
 		List<Action> actionList = new ArrayList<Action>();
 		List<Movement> movementList = generateMovements(state);
-		List<int[]> aux = new ArrayList<int[]>();
-		
-		//Controlar que no mueva arena
-		int[] array0 = {0, 0, 0, 0};
-		aux.add(array0);
-		
-		//el ultimo caso antes de empezar a descartar
-		int[] maxArray = {state.getMax(), state.getMax(), state.getMax(), state.getMax()};
-		int k = 0;
-		for (int i = 0; i < maxArray.length; i++){
-			k = 10 * k + maxArray[i];
-		}
-		    
-		//obtener el array con todos los movs posibles
-	    for (int i = 1; i < k; i++ ){
-	    	aux.add(digits(i));
-	    }
-	    
-	    int auxSum;																	//variable que controla que no se mueva mas de k unidades de tierra
-	    for(int i = 0; i < movementList.size(); i++){								//Para todo movimiento ( N, E, S, O, NULL)
-	    	for(int j = 0; j < aux.size(); j++){									//Para cada posible combiancion
-	    		auxSum = 0;
-	    		
-	    		for(int m = 0; m < aux.get(j).length; m++){							//vemos los movimientos de tierra
-	    			auxSum += aux.get(j)[m];
-	    		}
-	    		if(auxSum <= state.getPosition(state.getTractorX(), state.getTractorY())){													//si no superan el limite se add a la lista de actions
-	    			
-	    			if ((movementList.get(i).getNewX() >= 0) && (movementList.get(i).getNewX() <= state.getField().length)){
-	    				
-	    				if((movementList.get(i).getNewY() >= 0) && (movementList.get(i).getNewY() <= state.getField().length)){
-	    					
-	    					Movement m = new Movement(movementList.get(i).getNewX(),
-								      				  movementList.get(i).getNewY());
-	    					Action auxAction = new Action(m,
-										  				  aux.get(j)[0],
-										  				  aux.get(j)[1],
-										  				  aux.get(j)[2],
-										  				  aux.get(j)[3]);
-	    					actionList.add(auxAction);
-	    				}		
-	    			}
-	    		}
-	    	}
-	    }
-		return actionList;
-	}
-	
-	//CORRECTO
-	public static int[] digits(int number) {
-	    
-		int[] digits = new int[4];
-	    int i = 0;
+		boolean goOn;
+	    int[] auxA = new int[4];
 	   
-	    while(number > 0) {
-	        digits[i] = (number % 10);
-	        number /= 10;
-	        i++;
-	    }
-	    return digits;
+	    for(int i = 0; i <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); i ++){
+	    	
+	    	for(int j = 0; j <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); j++){
+	    	
+	    		for(int x = 0; x <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); x++){
+	    		
+	    			for( int y = 0; y <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); y++){
+	    			
+	    				auxA[0] = i;		//NORTH MOVED SAND
+	    				auxA[1] = j;		//EAST MOVED SAND
+	    				auxA[2] = x;		//SOUTH MOVED SAND
+	    				auxA[3] = y;		//WEST MOVED SAND
+	    				
+	    				if(i+j+x+y == state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean()){
+	    	    			
+	    					if( !((i > 0) && (state.getTractorX() == 0)) &&
+		    					!((j > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
+		    					!((x > 0) && (state.getTractorX() == state.getField().length - 1)) &&
+		    					!((y > 0) && (state.getTractorY() == 0))){
+	    					
+	    							for( int mov = 0; mov < movementList.size(); mov++){
+	    	    						goOn = true;
+	    								for( int mov2 = 0; mov2 < movementList.size(); mov2++){
+	    									if(i > 0){
+	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + i > state.getMax()){
+	    		    								goOn = false;
+	    		    							}
+	    		    						}
+	    		    						
+	    		    						if(j > 0){
+	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + j > state.getMax()){
+	    		    								goOn = false;
+	    		    							}
+	    		    						}
+	    		    						
+	    		    						if(x > 0){
+	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + x > state.getMax()){
+	    		    								goOn = false;
+	    		    							}
+	    		    						}
+	    		    						
+	    		    						if(y > 0){
+	    		    							if(state.getPosition(movementList.get(mov2).getNewX(), movementList.get(mov2).getNewY()) + y > state.getMax()){
+	    		    								goOn = false;
+	    		    							}
+	    		    						}
+	    								}
+	    									
+	    								if(goOn){
+		    								Movement m = new Movement(movementList.get(mov).getNewX(),
+		    														  movementList.get(mov).getNewY());
+		    								Action auxAction = new Action(m, i, j, x, y);
+		    								actionList.add(auxAction);
+		    							}
+	    							}		    								
+	    						
+	    					}		
+		    			}	
+	    			}	
+	    		}
+	  		}
+	    } 
+		return actionList;
 	}
 	
 	//CORRECTO
@@ -118,5 +165,54 @@ public class Pruebas {
 		return movementList;
 	}
 
+	//CORRECTO
+	public static State applyAction(State state, Action action){
+		
+		State newState = new State();
+		
+		newState.setField(state.getField());
+		newState.setMax(state.getMax());
+		newState.setMean(state.getMean());
+		newState.setTractorX(action.getNewMove().getNewX());
+		newState.setTractorY(action.getNewMove().getNewY());
+		
+		int centric = state.getPosition(state.getTractorX(), state.getTractorY());		
+		centric = centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW();
+		newState.setPosition(state.getTractorX(), state.getTractorY(), centric);
+		
+		if(!(action.getSandN()==0) && (state.getTractorX() - 1 >= 0)){
+			int northValue = state.getPosition(state.getTractorX() - 1, state.getTractorY());
+			if (!(northValue<= newState.getMax())) {
+				northValue = northValue + action.getSandW();
+				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, northValue);
+			}
+		}
+		
+		if(!(action.getSandE()==0) && (state.getTractorY() + 1 < state.getField()[0].length)){
+			int eastValue = state.getPosition(state.getTractorX(), state.getTractorY() + 1);
+			if (!( eastValue<= newState.getMax())) {
+				eastValue = eastValue + action.getSandW();
+				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, eastValue);
+			}
+		}
+		
+		if(!(action.getSandS()==0) && state.getTractorX() + 1 < state.getField().length){
+			int southValue = state.getPosition(state.getTractorX() + 1, state.getTractorY());
+			if (!(southValue <= newState.getMax())) {
+				southValue = southValue + action.getSandW();
+				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, southValue);
+			}
+		}
+		
+		if(!(action.getSandW()==0) && state.getTractorY() - 1 >= 0){
+			int westValue = state.getPosition(state.getTractorX() , state.getTractorY() - 1);
+			if (!(westValue <= newState.getMax())) {
+				westValue = westValue + action.getSandW();
+				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, westValue);
+			}
+			
+		}
+		return newState;
+	}
 	
 }
