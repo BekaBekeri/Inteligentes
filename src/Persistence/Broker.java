@@ -82,9 +82,10 @@ public class Broker {
 	 * @param newfilename: name of the file in which the information is going to be stored
 	 * @param fieldarray: array containing the final state of the field
 	 * @param infoarray: array containing the final state of the rest of the information
+	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename, int[][] fieldarray, int[] infoarray) throws IOException{
+	public static void writeFile(String newfilename, int[][] fieldarray, int[] infoarray, String[] actions) throws IOException{
 		int lines=1+fieldarray.length;
 		int rows=infoarray[5];
 		int columns = infoarray[4];
@@ -103,6 +104,9 @@ public class Broker {
 		PrintWriter writer = new PrintWriter(newfilename, "UTF-8");
 		for (int i=0; i<data.length;i++){
 			writer.println(data[i]);
+		}
+		for (int i=0; i<actions.length; i++) {
+			writer.println(actions[i]);
 		}
 		writer.close();
 	}

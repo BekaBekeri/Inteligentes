@@ -56,4 +56,16 @@ public class Action {
 		this.newMove = newMove;
 	}
 	
+	public String toString(State state){
+		String aux = "";
+		
+		aux = "(" + newMove.getNewX() + ", " + newMove.getNewY() + "), [(" + sandN + ", (" + 
+			  (state.getTractorX()-1) + ", " + state.getTractorY() + ")), ("+ sandE + ", (" + 
+			  state.getTractorX() + ", " + (state.getTractorY()+1) + ")), ("+ sandS + ", (" + 
+			  (state.getTractorX()+1) + ", " + state.getTractorY() + ")), (" + sandW + ", (" + 
+			  state.getTractorX() + ", " + (state.getTractorY()-1) + "))].";
+
+		return aux;
+	}
+	
 }

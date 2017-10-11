@@ -5,12 +5,23 @@ import java.util.*;
 
 import Exceptions.wrongDataException;
 
+/*************************************************************************************
+ * Class Name: Control
+ * Class Description:Class that implements the main functionality of the program
+ *************************************************************************************/
 public class Control {
 
 	private static String[] finalactions;
 	private static State finalstate;
 	
-public static void mainFunctionality(int[] infoarray, int[][]initialField){
+	/***************************************************************************************************************
+	 * Method name: mainFunctionality
+	 * Method Description: method whose responsibility is performing the main requirements of the program, calling other methods
+	 * in the process.
+	 * @param infoarray: an array containing information about the problem
+	 * @param initialField: an array containing the information about the sand in the field
+	 **************************************************************************************************************/
+	public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		
 		State initialState = new State();
 		initialState.setTractorX(infoarray[0]);
@@ -21,6 +32,7 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 	
 		List<Action> actionList = generateActions(initialState);
 		finalactions = new String[actionList.size()];
+		System.out.println("These are the possible actions in the given conditions: ");
 		for(int i = 0; i < actionList.size(); i++){
 			finalactions[i]	= actionList.get(i).toString(initialState); 
 			System.out.println(actionList.get(i).toString(initialState));
@@ -29,76 +41,55 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		Random randomGenerator = new Random();
 		int rnd = randomGenerator.nextInt(actionList.size());
 		State newstate = applyAction(initialState, actionList.get(rnd));
-		finalstate = newstate;
-}
-	
-	//CORRECTO
-	public static List<State> generateStates(List<Action> actionList, State state){
-		
-		List<State> succesorStates = new ArrayList<State>();
-		
-		for(int i = 0; i < actionList.size(); i++){
-			//si x+movx es menor que el borde y si x-movx es mayor que 0
-			if( (actionList.get(i).getNewMove().getNewX() < state.getField().length) &&
-			    (actionList.get(i).getNewMove().getNewX() >= 0) &&
-			    (actionList.get(i).getNewMove().getNewY() < state.getField()[0].length) &&
-			    (actionList.get(i).getNewMove().getNewY() >= 0)){
-				
-				if(state.getPosition(state.getTractorX(), state.getTractorY()) <= actionList.get(i).getSandN() + 
-																				  actionList.get(i).getSandE() + 
-																				  actionList.get(i).getSandS() + 
-																				  actionList.get(i).getSandW()){
-					State auxState = applyAction(state, actionList.get(i));
-					boolean correct = true;												//controla que en cada terreno no haya una cantidad de arena mas grande que max
-					for(int x = 0; x < auxState.getField().length; x++){	
-						for(int y = 0; y < auxState.getField()[0].length; y++){
-							if(auxState.getField()[x][y] > auxState.getMax()){
-								correct = false;
-							}
-						}
-					}
-					if(correct){
-						succesorStates.add(auxState);
-					}
-				}
+		System.out.println("\nAnd this is the final state: ");
+		for (int i=0; i<newstate.getField().length; i++) {
+			for (int j=0; j<newstate.getField()[0].length; j++) {
+				System.out.print(newstate.getField()[i][j]+ " ");
 			}
+			System.out.println();
 		}
-		return succesorStates;
+		finalstate = newstate;
 	}
 	
-	//CORRECTO
+	
+	/******************************************************************************************************
+	 * Method name: generateActions
+	 * Method description: method encharged of generating the possible actions given certain conditions
+	 * @param state: the state that determines what actions can and cannot be taken
+	 * @return
+	 ****************************************************************************************************/
 	public static List<Action> generateActions(State state){
 		List<Action> actionList = new ArrayList<Action>();
 		List<Movement> movementList = generateMovements(state);
 		boolean goOn;
 	    int[] auxA = new int[4];
 	   
-	    for(int i = 0; i <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); i ++){
+	    for(int n = 0; n <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); n ++){
 	    	
-	    	for(int j = 0; j <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); j++){
+	    	for(int e = 0; e <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); e++){
 	    	
-	    		for(int x = 0; x <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); x++){
+	    		for(int s = 0; s <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); s++){
 	    		
-	    			for( int y = 0; y <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); y++){
+	    			for( int w = 0; w <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); w++){
 	    			
-	    				auxA[0] = i;		//NORTH MOVED SAND
-	    				auxA[1] = j;		//EAST MOVED SAND
-	    				auxA[2] = x;		//SOUTH MOVED SAND
-	    				auxA[3] = y;		//WEST MOVED SAND
+	    				auxA[0] = n;		//NORTH MOVED SAND
+	    				auxA[1] = e;		//EAST MOVED SAND
+	    				auxA[2] = s;		//SOUTH MOVED SAND
+	    				auxA[3] = w;		//WEST MOVED SAND
 	    				
-	    				if(i+j+x+y == state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean()){
+	    				if(n+e+s+w == state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean()){
 	    	    			
-	    					if( !((i > 0) && (state.getTractorX() == 0)) &&
-		    					!((j > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
-		    					!((x > 0) && (state.getTractorX() == state.getField().length - 1)) &&
-		    					!((y > 0) && (state.getTractorY() == 0))){
+	    					if( !((n > 0) && (state.getTractorX() == 0)) &&
+		    					!((e > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
+		    					!((s > 0) && (state.getTractorX() == state.getField().length - 1)) &&
+		    					!((w > 0) && (state.getTractorY() == 0))){
 	    							
 		    					if(isPossibleSand(auxA, state)) {
 		    							for( int mov = 0; mov < movementList.size(); mov++){
 		    								
-			    								Movement m = new Movement(movementList.get(mov).getNewX(),
+			    								Movement move = new Movement(movementList.get(mov).getNewX(),
 			    														  movementList.get(mov).getNewY());
-			    								Action auxAction = new Action(m, i, j, x, y);
+			    								Action auxAction = new Action(move, n, e, s, w);
 			    								actionList.add(auxAction);
 		    							}
 		    					}		    								
@@ -112,7 +103,12 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		return actionList;
 	}
 	
-	//CORRECTO
+	/*******************************************************************************************************
+	 * Method name: generateMovements
+	 * Method description: method encharged of creating the possible movements of the truck
+	 * @param state: an object of the class State that contains the information of the current state
+	 * @return
+	 *******************************************************************************************************/
 	private static List<Movement> generateMovements(State state) {
 		List<Movement> movementList = new ArrayList<Movement>();
 		
@@ -135,7 +131,13 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		return movementList;
 	}
 
-	//CORRECTO
+	/*************************************************************************************************
+	 * Method name: applyAction
+	 * Method description: method encharged of applying a given action to an initial state
+	 * @param state: initial state to which the action is going to be applied
+	 * @param action: action that is going to be performed
+	 * @return: the new state after the changes done by action
+	 *************************************************************************************************/
 	public static State applyAction(State state, Action action){
 		
 		State newState = new State();
@@ -185,6 +187,13 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		return newState;
 	}
 	
+	/*******************************************************************************************************
+	 * Method name: isPossibleSand
+	 * Method description: method encharged of determining if moving a given amount of sand is possible
+	 * @param sandToMove: array containing the amount of sand that is going to be moved to each direction
+	 * @param current: current state of the field
+	 * @return: a boolean, true if is possible to move sand, false in other case
+	 ******************************************************************************************************/
 	private static boolean isPossibleSand(int[] sandToMove, State current) {
 		boolean check=true;
 			if (sandToMove[0]>0) {
@@ -212,12 +221,25 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		return check;
 	}
 	
+	/*******************************************************************************************************
+	 * Method name: read
+	 * Method description: Method encharged of calling the Broker of persistence in order to read a file
+	 * @param filename: name of the file to be read
+	 * @throws FileNotFoundException: on problems finding the file
+	 * @throws wrongDataException: on controlled errors
+	 ********************************************************************************************************/
 	public static void read(String filename) throws FileNotFoundException, wrongDataException {
 		int[] infoarray = new int[6];
 		int[][] initialField = Persistence.Broker.readFile(filename, infoarray);
 		mainFunctionality(infoarray, initialField);
 	}
 	
+	/********************************************************************************************************
+	 * Method name:write
+	 * Method description: method encharged of calling the Broker of persistence, in order to write to a file
+	 * @param filename: the name of the file that information is going to be writen to
+	 * @throws IOException: on unknown error while trying to write
+	 ********************************************************************************************************/
 	public static void write(String filename) throws IOException {
 		int[] infoarray = new int[6];
 		infoarray[0] = finalstate.getTractorX();
@@ -230,4 +252,3 @@ public static void mainFunctionality(int[] infoarray, int[][]initialField){
 	}
 	
 }
-

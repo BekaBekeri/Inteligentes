@@ -68,4 +68,5 @@ public class State {
 	public void setPosition(int x, int y, int value){
 		field[x][y] = value;
 	}
+	
 }
