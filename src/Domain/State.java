@@ -41,7 +41,13 @@ public class State implements Comparable<State> {
 	}
 
 	public int[][] getField() {
-		return field;
+		int [][] aux=new int[field.length][field[0].length];
+		for(int i=0;i<aux.length;i++) {
+			for(int j=0;j<aux[i].length;j++) {
+				aux[i][j]=field[i][j];
+			}
+		}
+		return aux;
 	}
 
 	public void setField(int[][] field) {
@@ -101,10 +107,10 @@ public class State implements Comparable<State> {
 	public int compareTo(State newState){
 		int r = 0;
 		
-		if(newState.getCost() < cost){
+		if(newState.getCost() > cost){
 			r = -1;
 		}
-		else/*(newState.getCost() < cost)*/{
+		else if(newState.getCost() < cost){
 			r = +1;
 		}
 		

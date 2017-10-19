@@ -27,6 +27,7 @@ public class Control {
 		frontier = new PriorityQueue<State>();
 		
 		State initialState = new State();
+		System.out.println(infoarray[2]);
 		initialState.setTractorX(infoarray[0]);
 		initialState.setTractorY(infoarray[1]);
 		initialState.setMean(infoarray[2]);
@@ -36,11 +37,14 @@ public class Control {
 		List<Action> actionList = null;
 
 		frontier.add(initialState);
+		int i=0;
 		while(!frontier.isEmpty() && !isGoal(frontier.peek())){
 			actionList=generateActions(frontier.peek());
+			
 			succesor(actionList, frontier.poll());
-			x++;
+			i++;
 		}
+		System.out.println(i);
 		
 		if(frontier.isEmpty()){
 			System.out.println("No solution found.");
@@ -144,7 +148,7 @@ public class Control {
 	 * @return: the new state after the changes done by action
 	 *************************************************************************************************/
 	public static State applyAction(State state, Action action){
-		
+		System.out.println(action.toString(state));
 		State newState = new State();
 		
 		newState.setField(state.getField());
@@ -154,42 +158,56 @@ public class Control {
 		newState.setTractorY(action.getNewMove().getNewY());
 		newState.setFather(state);
 		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1); //+1 cause the movement of the tractor
-		
 		int centric = state.getPosition(state.getTractorX(), state.getTractorY());		
 		centric = centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW();
 		newState.setPosition(state.getTractorX(), state.getTractorY(), centric);
 		
-		if(!(action.getSandN()==0) && (state.getTractorX() - 1 >= 0)){
+		if((action.getSandN()>0) && (state.getTractorX() - 1 >= 0)){
 			int northValue = state.getPosition(state.getTractorX() - 1, state.getTractorY());
-			if (!(northValue<= newState.getMax())) {
-				northValue = northValue + action.getSandW();
-				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, northValue);
+			if ((northValue + action.getSandN())<= newState.getMax()) {
+				northValue = northValue + action.getSandN();
+				newState.setPosition(state.getTractorX() -1, state.getTractorY(), northValue);
 			}
 		}
 		
-		if(!(action.getSandE()==0) && (state.getTractorY() + 1 < state.getField()[0].length)){
+		if((action.getSandE()>0) && (state.getTractorY() + 1 < state.getField()[0].length)){
 			int eastValue = state.getPosition(state.getTractorX(), state.getTractorY() + 1);
-			if (!( eastValue<= newState.getMax())) {
-				eastValue = eastValue + action.getSandW();
-				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, eastValue);
+			if ((eastValue + action.getSandE())<= newState.getMax()) {
+				eastValue = eastValue + action.getSandE();
+				newState.setPosition(state.getTractorX(), state.getTractorY() + 1, eastValue);
 			}
 		}
 		
-		if(!(action.getSandS()==0) && state.getTractorX() + 1 < state.getField().length){
+		if((action.getSandS()>0) && state.getTractorX() + 1 < state.getField().length){
 			int southValue = state.getPosition(state.getTractorX() + 1, state.getTractorY());
-			if (!(southValue <= newState.getMax())) {
-				southValue = southValue + action.getSandW();
-				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, southValue);
+			if ((southValue + action.getSandS()) <= newState.getMax()) {
+				southValue = southValue + action.getSandS();
+				newState.setPosition(state.getTractorX() +1 , state.getTractorY(), southValue);
 			}
 		}
 		
-		if(!(action.getSandW()==0) && state.getTractorY() - 1 >= 0){
+		if((action.getSandW()>0) && (state.getTractorY() - 1 >= 0)){
 			int westValue = state.getPosition(state.getTractorX() , state.getTractorY() - 1);
-			if (!(westValue <= newState.getMax())) {
+			if ((westValue + action.getSandW()) <= newState.getMax()) {
 				westValue = westValue + action.getSandW();
 				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, westValue);
 			}
 			
+		}
+		for(int i = 0; i < newState.getField().length; i++){
+			System.out.println();
+			for(int j = 0; j < newState.getField()[0].length; j++){
+				System.out.print(newState.getField()[i][j]+ " ");
+				if(newState.getField()[i][j] != newState.getMean()){
+					//aux = false;
+					
+ 					//System.out.println(state.getField()[i][j]);
+				}
+			}
+		}
+		
+		if(newState.equals(state)) {
+			return null;
 		}
 		
 		return newState;
@@ -269,9 +287,13 @@ public class Control {
 		boolean aux = true;
 		
 		for(int i = 0; i < state.getField().length; i++){
+			//System.out.println();
 			for(int j = 0; j < state.getField()[0].length; j++){
-				if(!(state.getField()[i][j] == state.getMean())){
-					aux = false; 
+				//System.out.print(state.getField()[i][j]+ " ");
+				if(state.getField()[i][j] != state.getMean()){
+					aux = false;
+					
+ 					//System.out.println(state.getField()[i][j]);
 				}
 			}
 		}
