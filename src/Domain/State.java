@@ -1,5 +1,5 @@
 package Domain;
-public class State {
+public class State implements Comparable<State> {
 	
 	private int [][] field;
 	
@@ -7,6 +7,9 @@ public class State {
 	private int tractorY;
 	private int mean;
 	private int max;
+	private State father = null; 
+	private Action appliedAction = null;
+	private int cost = 0; 
 	
 	public State(int[][] field, int tractorX, int tractorY, int mean, int max) {
 		super();
@@ -14,7 +17,7 @@ public class State {
 		this.tractorX = tractorX;
 		this.tractorY = tractorY;
 		this.mean = mean;
-		this.max = max;
+		this.max = max; 
 	}
 
 	
@@ -67,6 +70,45 @@ public class State {
 	
 	public void setPosition(int x, int y, int value){
 		field[x][y] = value;
+	}
+
+	public State getFather() {
+		return father;
+	}
+
+	public void setFather(State father) {
+		this.father = father;
+	}
+
+	public Action getAppliedAction() {
+		return appliedAction;
+	}
+
+	public void setAppliedAction(Action appliedAction) {
+		this.appliedAction = appliedAction;
+	}
+	
+	public int getCost() {
+		return cost;
+	}
+
+
+	public void setCost(int cost) {
+		this.cost = cost;
+	}
+
+
+	public int compareTo(State newState){
+		int r = 0;
+		
+		if(newState.getCost() < cost){
+			r = -1;
+		}
+		else/*(newState.getCost() < cost)*/{
+			r = +1;
+		}
+		
+		return r;
 	}
 	
 }

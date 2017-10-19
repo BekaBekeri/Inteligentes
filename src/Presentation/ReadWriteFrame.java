@@ -55,6 +55,7 @@ public class ReadWriteFrame {
 	 * @param filename: the name of the filw to be written
 	 * @return: a boolean, true in correct execution, false in other case
 	 */
+	
 	protected static boolean writeFile(String filename) {
 		boolean correctExec = false;
 		try{

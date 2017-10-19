@@ -12,6 +12,7 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static String[] finalactions;
+	private static PriorityQueue<State> frontier;
 	private static State finalstate;
 	
 	/***************************************************************************************************************
@@ -23,32 +24,39 @@ public class Control {
 	 **************************************************************************************************************/
 	public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		
+		frontier = new PriorityQueue<State>();
+		
 		State initialState = new State();
 		initialState.setTractorX(infoarray[0]);
 		initialState.setTractorY(infoarray[1]);
 		initialState.setMean(infoarray[2]);
 		initialState.setMax(infoarray[3]);
 		initialState.setField(initialField);
-	
-		List<Action> actionList = generateActions(initialState);
-		finalactions = new String[actionList.size()];
-		System.out.println("These are the possible actions in the given conditions: ");
-		for(int i = 0; i < actionList.size(); i++){
-			finalactions[i]	= actionList.get(i).toString(initialState); 
-			System.out.println(actionList.get(i).toString(initialState));
+		
+		List<Action> actionList = null;
+
+		frontier.add(initialState);
+		while(!frontier.isEmpty() && !isGoal(frontier.peek())){
+			actionList=generateActions(frontier.peek());
+			succesor(actionList, frontier.poll());
+			x++;
 		}
-	
-		Random randomGenerator = new Random();
-		int rnd = randomGenerator.nextInt(actionList.size());
-		State newstate = applyAction(initialState, actionList.get(rnd));
-		System.out.println("\nAnd this is the final state: ");
-		for (int i=0; i<newstate.getField().length; i++) {
-			for (int j=0; j<newstate.getField()[0].length; j++) {
-				System.out.print(newstate.getField()[i][j]+ " ");
+		
+		if(frontier.isEmpty()){
+			System.out.println("No solution found.");
+		}else{
+			if (isGoal(frontier.peek())){
+				System.out.println("Solution found");
 			}
-			System.out.println();
 		}
-		finalstate = newstate;
+		//possibleActions = new String[actionList.size()];
+		
+		//System.out.println("These are the possible actions in the given conditions: ");
+		//for(int i = 0; i < actionList.size(); i++){
+		//	finalactions[i]	= actionList.get(i).toString(initialState); 
+		//	System.out.println(actionList.get(i).toString(initialState));
+		//}
+		
 	}
 	
 	
@@ -61,7 +69,6 @@ public class Control {
 	public static List<Action> generateActions(State state){
 		List<Action> actionList = new ArrayList<Action>();
 		List<Movement> movementList = generateMovements(state);
-		boolean goOn;
 	    int[] auxA = new int[4];
 	   
 	    for(int n = 0; n <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); n ++){
@@ -85,15 +92,13 @@ public class Control {
 		    					!((w > 0) && (state.getTractorY() == 0))){
 	    							
 		    					if(isPossibleSand(auxA, state)) {
-		    							for( int mov = 0; mov < movementList.size(); mov++){
-		    								
-			    								Movement move = new Movement(movementList.get(mov).getNewX(),
-			    														  movementList.get(mov).getNewY());
-			    								Action auxAction = new Action(move, n, e, s, w);
-			    								actionList.add(auxAction);
-		    							}
+		    						for( int mov = 0; mov < movementList.size(); mov++){
+			    						Movement move = new Movement(movementList.get(mov).getNewX(),
+			    													 movementList.get(mov).getNewY());
+			    						Action auxAction = new Action(move, n, e, s, w);
+			    						actionList.add(auxAction);
+		    						}
 		    					}		    								
-	    						
 	    					}		
 		    			}	
 	    			}	
@@ -147,6 +152,8 @@ public class Control {
 		newState.setMean(state.getMean());
 		newState.setTractorX(action.getNewMove().getNewX());
 		newState.setTractorY(action.getNewMove().getNewY());
+		newState.setFather(state);
+		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1); //+1 cause the movement of the tractor
 		
 		int centric = state.getPosition(state.getTractorX(), state.getTractorY());		
 		centric = centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW();
@@ -184,6 +191,7 @@ public class Control {
 			}
 			
 		}
+		
 		return newState;
 	}
 	
@@ -240,7 +248,7 @@ public class Control {
 	 * @param filename: the name of the file that information is going to be writen to
 	 * @throws IOException: on unknown error while trying to write
 	 ********************************************************************************************************/
-	public static void write(String filename) throws IOException {
+	 public static void write(String filename) throws IOException {
 		int[] infoarray = new int[6];
 		infoarray[0] = finalstate.getTractorX();
 		infoarray[1] = finalstate.getTractorY();
@@ -251,4 +259,31 @@ public class Control {
 		Persistence.Broker.writeFile(filename, finalstate.getField(), infoarray, finalactions);
 	}
 	
+	/************************************************************************************************************
+	 * Method name: isGoal
+	 * Method description: This method is used to check if the state is the one that we are looking for
+	 * @param state: the state we want to check
+	 * @return boolean depending 
+	 *************************************************************************************************************/
+	public static boolean isGoal(State state){
+		boolean aux = true;
+		
+		for(int i = 0; i < state.getField().length; i++){
+			for(int j = 0; j < state.getField()[0].length; j++){
+				if(!(state.getField()[i][j] == state.getMean())){
+					aux = false; 
+				}
+			}
+		}
+		return aux;
+	}
+
+
+	public static void succesor(List<Action> actionList, State currentState){
+		for(int i = 0; i < actionList.size(); i++){
+			frontier.add(applyAction(currentState, actionList.get(i)));
+		}
+		
+	}
+
 }
