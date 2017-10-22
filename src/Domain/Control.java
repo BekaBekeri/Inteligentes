@@ -12,8 +12,10 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static String[] finalactions;
-	private static PriorityQueue<State> frontier;
+	private static PriorityQueue<NodeState> frontier;
 	private static State finalstate;
+	private static int mean;
+	private static int max;
 	
 	/***************************************************************************************************************
 	 * Method name: mainFunctionality
@@ -24,14 +26,15 @@ public class Control {
 	 **************************************************************************************************************/
 	public static void mainFunctionality(int[] infoarray, int[][]initialField){
 		
-		frontier = new PriorityQueue<State>();
+		frontier = new PriorityQueue<NodeState>();
 		
-		State initialState = new State();
-		System.out.println(infoarray[2]);
+		NodeState initialState = new NodeState();
 		initialState.setTractorX(infoarray[0]);
 		initialState.setTractorY(infoarray[1]);
-		initialState.setMean(infoarray[2]);
-		initialState.setMax(infoarray[3]);
+		
+		mean = infoarray[2];
+		max = infoarray[3];
+		
 		initialState.setField(initialField);
 		
 		List<Action> actionList = null;
@@ -40,7 +43,6 @@ public class Control {
 		int i=0;
 		while(!frontier.isEmpty() && !isGoal(frontier.peek())){
 			actionList=generateActions(frontier.peek());
-			
 			succesor(actionList, frontier.poll());
 			i++;
 		}
@@ -75,20 +77,20 @@ public class Control {
 		List<Movement> movementList = generateMovements(state);
 	    int[] auxA = new int[4];
 	   
-	    for(int n = 0; n <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); n ++){
+	    for(int n = 0; n <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; n ++){
 	    	
-	    	for(int e = 0; e <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); e++){
+	    	for(int e = 0; e <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; e++){
 	    	
-	    		for(int s = 0; s <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); s++){
+	    		for(int s = 0; s <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; s++){
 	    		
-	    			for( int w = 0; w <= state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean(); w++){
-	    			
+	    			for( int w = 0; w <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; w++){
+	    			 
 	    				auxA[0] = n;		//NORTH MOVED SAND
 	    				auxA[1] = e;		//EAST MOVED SAND
 	    				auxA[2] = s;		//SOUTH MOVED SAND
 	    				auxA[3] = w;		//WEST MOVED SAND
 	    				
-	    				if(n+e+s+w == state.getPosition(state.getTractorX(), state.getTractorY()) - state.getMean()){
+	    				if(n+e+s+w == state.getPosition(state.getTractorX(), state.getTractorY()) - mean){
 	    	    			
 	    					if( !((n > 0) && (state.getTractorX() == 0)) &&
 		    					!((e > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
@@ -147,13 +149,11 @@ public class Control {
 	 * @param action: action that is going to be performed
 	 * @return: the new state after the changes done by action
 	 *************************************************************************************************/
-	public static State applyAction(State state, Action action){
-		System.out.println(action.toString(state));
-		State newState = new State();
+	public static NodeState applyAction(NodeState state, Action action){
+		
+		NodeState newState = new NodeState();
 		
 		newState.setField(state.getField());
-		newState.setMax(state.getMax());
-		newState.setMean(state.getMean());
 		newState.setTractorX(action.getNewMove().getNewX());
 		newState.setTractorY(action.getNewMove().getNewY());
 		newState.setFather(state);
@@ -164,7 +164,7 @@ public class Control {
 		
 		if((action.getSandN()>0) && (state.getTractorX() - 1 >= 0)){
 			int northValue = state.getPosition(state.getTractorX() - 1, state.getTractorY());
-			if ((northValue + action.getSandN())<= newState.getMax()) {
+			if ((northValue + action.getSandN())<= max) {
 				northValue = northValue + action.getSandN();
 				newState.setPosition(state.getTractorX() -1, state.getTractorY(), northValue);
 			}
@@ -172,7 +172,7 @@ public class Control {
 		
 		if((action.getSandE()>0) && (state.getTractorY() + 1 < state.getField()[0].length)){
 			int eastValue = state.getPosition(state.getTractorX(), state.getTractorY() + 1);
-			if ((eastValue + action.getSandE())<= newState.getMax()) {
+			if ((eastValue + action.getSandE())<= max) {
 				eastValue = eastValue + action.getSandE();
 				newState.setPosition(state.getTractorX(), state.getTractorY() + 1, eastValue);
 			}
@@ -180,7 +180,7 @@ public class Control {
 		
 		if((action.getSandS()>0) && state.getTractorX() + 1 < state.getField().length){
 			int southValue = state.getPosition(state.getTractorX() + 1, state.getTractorY());
-			if ((southValue + action.getSandS()) <= newState.getMax()) {
+			if ((southValue + action.getSandS()) <= max) {
 				southValue = southValue + action.getSandS();
 				newState.setPosition(state.getTractorX() +1 , state.getTractorY(), southValue);
 			}
@@ -188,22 +188,11 @@ public class Control {
 		
 		if((action.getSandW()>0) && (state.getTractorY() - 1 >= 0)){
 			int westValue = state.getPosition(state.getTractorX() , state.getTractorY() - 1);
-			if ((westValue + action.getSandW()) <= newState.getMax()) {
+			if ((westValue + action.getSandW()) <= max) {
 				westValue = westValue + action.getSandW();
 				newState.setPosition(state.getTractorX() , state.getTractorY() - 1, westValue);
 			}
 			
-		}
-		for(int i = 0; i < newState.getField().length; i++){
-			System.out.println();
-			for(int j = 0; j < newState.getField()[0].length; j++){
-				System.out.print(newState.getField()[i][j]+ " ");
-				if(newState.getField()[i][j] != newState.getMean()){
-					//aux = false;
-					
- 					//System.out.println(state.getField()[i][j]);
-				}
-			}
 		}
 		
 		if(newState.equals(state)) {
@@ -223,22 +212,22 @@ public class Control {
 	private static boolean isPossibleSand(int[] sandToMove, State current) {
 		boolean check=true;
 			if (sandToMove[0]>0) {
-				if (current.getPosition(current.getTractorX()-1, current.getTractorY())+sandToMove[0]>current.getMax()){
+				if (current.getPosition(current.getTractorX()-1, current.getTractorY())+sandToMove[0]>max){
 					check=false;
 				}
 			}
 			if (sandToMove[1]>0) {
-				if (current.getPosition(current.getTractorX(), current.getTractorY()+1)+sandToMove[1]>current.getMax()){
+				if (current.getPosition(current.getTractorX(), current.getTractorY()+1)+sandToMove[1]>max){
 					check=false;
 				}
 			}	
 			if (sandToMove[2]>0) {
-				if (current.getPosition(current.getTractorX()+1, current.getTractorY())+sandToMove[2]>current.getMax()){
+				if (current.getPosition(current.getTractorX()+1, current.getTractorY())+sandToMove[2]>max){
 					check=false;
 				}
 			}
 			if (sandToMove[3]>0) {
-				if (current.getPosition(current.getTractorX(), current.getTractorY()-1)+sandToMove[3]>current.getMax()){
+				if (current.getPosition(current.getTractorX(), current.getTractorY()-1)+sandToMove[3]>max){
 					check=false;
 				}
 			}
@@ -270,8 +259,8 @@ public class Control {
 		int[] infoarray = new int[6];
 		infoarray[0] = finalstate.getTractorX();
 		infoarray[1] = finalstate.getTractorY();
-		infoarray[2] = finalstate.getMean();
-		infoarray[3] = finalstate.getMax();
+		infoarray[2] = mean;
+		infoarray[3] = max;
 		infoarray[4] = finalstate.getField().length;
 		infoarray[5] = finalstate.getField()[0].length;
 		Persistence.Broker.writeFile(filename, finalstate.getField(), infoarray, finalactions);
@@ -287,13 +276,9 @@ public class Control {
 		boolean aux = true;
 		
 		for(int i = 0; i < state.getField().length; i++){
-			//System.out.println();
 			for(int j = 0; j < state.getField()[0].length; j++){
-				//System.out.print(state.getField()[i][j]+ " ");
-				if(state.getField()[i][j] != state.getMean()){
+				if(state.getField()[i][j] != mean){
 					aux = false;
-					
- 					//System.out.println(state.getField()[i][j]);
 				}
 			}
 		}
@@ -301,7 +286,7 @@ public class Control {
 	}
 
 
-	public static void succesor(List<Action> actionList, State currentState){
+	public static void succesor(List<Action> actionList, NodeState currentState){
 		for(int i = 0; i < actionList.size(); i++){
 			frontier.add(applyAction(currentState, actionList.get(i)));
 		}
