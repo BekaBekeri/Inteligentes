@@ -37,7 +37,7 @@ public class MainPresentation {
 			case 1:
 				oldfile=ReadWriteFrame.getFileName();
 				if (ReadWriteFrame.readFile(oldfile)) {
-					System.out.println("Do you wish to save the final state in a file?(y/n): ");
+					System.out.println("Do you wish to save the result in a file?(y/n): ");
 					saveornot=read.next().charAt(0);
 					if (Character.toString(saveornot).equalsIgnoreCase("y")) {
 						do {

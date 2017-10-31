@@ -38,15 +38,14 @@ public class Control {
 		initialState.setField(initialField);
 		
 		List<Action> actionList = null;
-
 		frontier.add(initialState);
-		int i=0;
+		
+		System.out.println("Execution started. Please wait while our program looks for a solution.");
+		
 		while(!frontier.isEmpty() && !isGoal(frontier.peek())){
 			actionList=generateActions(frontier.peek());
 			succesor(actionList, frontier.poll());
-			i++;
 		}
-		System.out.println(i);
 		
 		if(frontier.isEmpty()){
 			System.out.println("No solution found.");
@@ -55,13 +54,6 @@ public class Control {
 				System.out.println("Solution found");
 			}
 		}
-		//possibleActions = new String[actionList.size()];
-		
-		//System.out.println("These are the possible actions in the given conditions: ");
-		//for(int i = 0; i < actionList.size(); i++){
-		//	finalactions[i]	= actionList.get(i).toString(initialState); 
-		//	System.out.println(actionList.get(i).toString(initialState));
-		//}
 		
 	}
 	
