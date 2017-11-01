@@ -34,10 +34,14 @@ public class ReadWriteFrame {
 	 * @return: a boolean, true in correct execution, false in other case
 	 **********************************************************************************************************/
 	protected static boolean readFile(String filename) {
-		boolean correctExec = false;
+		boolean solutionFound = false;
 		try {
-			Domain.Control.read(filename);
-			correctExec=true;
+			if(Domain.Control.read(filename)) {
+				solutionFound=true;
+			}else {
+				solutionFound=false;
+			}
+			
 		}catch (wrongDataException wde) {
 			System.out.println(wde.getMessage());
 		}catch (FileNotFoundException fnf) {
@@ -45,7 +49,7 @@ public class ReadWriteFrame {
 		}catch (Exception e) {
 			System.out.println("\nUndetermined error. Please, chech that everything is correct.\n");
 		}
-		return correctExec;
+		return solutionFound;
 	}
 	
 	

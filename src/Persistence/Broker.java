@@ -85,17 +85,17 @@ public class Broker {
 	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename, int[][] fieldarray, int[] infoarray, String[] actions) throws IOException{
-		int lines=1+fieldarray.length;
+	public static void writeFile(String newfilename,int[][] initialfield, int[] infoarray,int[] newPosition, String[] actions) throws IOException{
 		int rows=infoarray[5];
 		int columns = infoarray[4];
+		int lines= rows+1;
 		String data[] = new String[lines];
 		for (int i=0; i<infoarray.length; i++) {
 			data[0]+=infoarray[i]+" ";
 		}
 		for (int i=0; i<rows; i++) {
 			for (int j=0; j<columns; j++) {
-				data[i+1]+=" "+fieldarray[i][j];
+				data[i+1]+=" "+initialfield[i][j];
 			}
 		}
 		for (int i=0; i<data.length; i++) {
@@ -105,8 +105,20 @@ public class Broker {
 		for (int i=0; i<data.length;i++){
 			writer.println(data[i]);
 		}
+		writer.println("(Above is our initial State)");
+		writer.println();
+		writer.println("****The actions taken to reach the goal state are: ****");
 		for (int i=0; i<actions.length; i++) {
 			writer.println(actions[i]);
+		}
+		writer.println();
+		writer.println("****And the final state is: ****");
+		writer.println(newPosition[0]+" "+newPosition[1]+" "+infoarray[2]+" "+infoarray[3]+" "+infoarray[4]+" "+infoarray[5]);
+		for (int i=0; i<infoarray[4]; i++) {
+			for (int j=0; j<infoarray[5]; j++) {
+				writer.print(" "+infoarray[2]); //All cells will have a value equal to the objective amount
+			}
+			writer.println();
 		}
 		writer.close();
 	}

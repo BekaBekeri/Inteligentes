@@ -13,7 +13,8 @@ public class Control {
 
 	private static String[] finalactions;
 	private static PriorityQueue<NodeState> frontier;
-	private static State finalstate;
+	private static NodeState finalstate;
+	private static NodeState initialState;
 	private static int mean;
 	private static int max;
 	
@@ -23,17 +24,20 @@ public class Control {
 	 * in the process.
 	 * @param infoarray: an array containing information about the problem
 	 * @param initialField: an array containing the information about the sand in the field
+	 * @return 
 	 **************************************************************************************************************/
-	public static void mainFunctionality(int[] infoarray, int[][]initialField){
+	public static boolean mainFunctionality(int[] infoarray, int[][]initialField){
 		
 		frontier = new PriorityQueue<NodeState>();
 		
-		NodeState initialState = new NodeState();
+		initialState = new NodeState();
 		initialState.setTractorX(infoarray[0]);
 		initialState.setTractorY(infoarray[1]);
 		
 		mean = infoarray[2];
 		max = infoarray[3];
+		
+		boolean solutionFound=false;
 		
 		initialState.setField(initialField);
 		
@@ -49,11 +53,39 @@ public class Control {
 		
 		if(frontier.isEmpty()){
 			System.out.println("No solution found.");
+			System.out.println();
 		}else{
 			if (isGoal(frontier.peek())){
 				System.out.println("Solution found");
+				System.out.println();
+				finalstate = frontier.poll();
+				
+				NodeState father = finalstate.getFather();
+				NodeState currentState = finalstate;
+				Stack<String> actionstack = new Stack<String>();
+
+				while(father.getFather()!=null) {
+					actionstack.push(currentState.getAppliedAction().toString(father));
+					father=father.getFather();
+					currentState=currentState.getFather();
+				}
+				actionstack.push(currentState.getAppliedAction().toString(father));
+				
+				finalactions = new String[actionstack.size()];
+				
+				System.out.println("List of actions in order to reach the goal state: ");
+				
+				for (int i=0; i<actionstack.size(); i++) {
+					System.out.println(actionstack.peek());
+					finalactions[i]=actionstack.pop();
+				}
+				solutionFound = true;
+				System.out.println();
+				System.out.println("And final position of the truck: "+finalstate.getTractorX()+", "+finalstate.getTractorY());
 			}
 		}
+		
+		return solutionFound;
 		
 	}
 	
@@ -149,6 +181,7 @@ public class Control {
 		newState.setTractorX(action.getNewMove().getNewX());
 		newState.setTractorY(action.getNewMove().getNewY());
 		newState.setFather(state);
+		newState.setAppliedAction(action);
 		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1); //+1 cause the movement of the tractor
 		int centric = state.getPosition(state.getTractorX(), state.getTractorY());		
 		centric = centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW();
@@ -232,13 +265,16 @@ public class Control {
 	 * Method name: read
 	 * Method description: Method encharged of calling the Broker of persistence in order to read a file
 	 * @param filename: name of the file to be read
+	 * @return 
 	 * @throws FileNotFoundException: on problems finding the file
 	 * @throws wrongDataException: on controlled errors
 	 ********************************************************************************************************/
-	public static void read(String filename) throws FileNotFoundException, wrongDataException {
+	public static boolean read(String filename) throws FileNotFoundException, wrongDataException {
+		boolean resultAchieved;
 		int[] infoarray = new int[6];
 		int[][] initialField = Persistence.Broker.readFile(filename, infoarray);
-		mainFunctionality(infoarray, initialField);
+		resultAchieved = mainFunctionality(infoarray, initialField);
+		return resultAchieved;
 	}
 	
 	/********************************************************************************************************
@@ -249,13 +285,19 @@ public class Control {
 	 ********************************************************************************************************/
 	 public static void write(String filename) throws IOException {
 		int[] infoarray = new int[6];
-		infoarray[0] = finalstate.getTractorX();
-		infoarray[1] = finalstate.getTractorY();
+		int[] newPosition = new int[2];
+		
+		infoarray[0] = initialState.getTractorX();
+		infoarray[1] = initialState.getTractorY();
 		infoarray[2] = mean;
 		infoarray[3] = max;
-		infoarray[4] = finalstate.getField().length;
-		infoarray[5] = finalstate.getField()[0].length;
-		Persistence.Broker.writeFile(filename, finalstate.getField(), infoarray, finalactions);
+		infoarray[4] = initialState.getField().length;
+		infoarray[5] = initialState.getField()[0].length;
+		
+		newPosition[0]=finalstate.getTractorX();
+		newPosition[1]=finalstate.getTractorY();
+		
+		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions);
 	}
 	
 	/************************************************************************************************************
