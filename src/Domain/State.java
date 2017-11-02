@@ -1,11 +1,11 @@
 package Domain;
 public class State{
 	
-	private int [][] field;
-	private int tractorX;
-	private int tractorY;
+	private byte [][] field;
+	private byte tractorX;
+	private byte tractorY;
 	
-	public State(int[][] field, int tractorX, int tractorY, int mean, int max) {
+	public State(byte[][] field, byte tractorX, byte tractorY, int mean, int max) {
 		this.field = field;
 		this.tractorX = tractorX;
 		this.tractorY = tractorY;
@@ -15,8 +15,8 @@ public class State{
 	public State() {
 	}
 
-	public int[][] getField() {
-		int [][] aux=new int[field.length][field[0].length];
+	public byte[][] getField() {
+		byte [][] aux=new byte[field.length][field[0].length];
 		for(int i=0;i<aux.length;i++) {
 			for(int j=0;j<aux[i].length;j++) {
 				aux[i][j]=field[i][j];
@@ -25,31 +25,31 @@ public class State{
 		return aux;
 	}
 
-	public void setField(int[][] field) {
+	public void setField(byte[][] field) {
 		this.field = field;
 	}
 
-	public int getTractorX() {
+	public byte getTractorX() {
 		return tractorX;
 	}
 
-	public void setTractorX(int tractorX) {
+	public void setTractorX(byte tractorX) {
 		this.tractorX = tractorX;
 	}
 
-	public int getTractorY() {
+	public byte getTractorY() {
 		return tractorY;
 	}
 
-	public void setTractorY(int tractorY) {
+	public void setTractorY(byte tractorY) {
 		this.tractorY = tractorY;
 	}
 
-	public int getPosition(int x, int y){
+	public byte getPosition(byte x, byte y){
 		return field[x][y];
 	}
 	
-	public void setPosition(int x, int y, int value){
+	public void setPosition(byte x, byte y, byte value){
 		field[x][y] = value;
 	}
 

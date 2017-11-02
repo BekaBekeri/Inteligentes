@@ -1,6 +1,7 @@
 package Persistence;
 import java.util.*;
 
+import Domain.NodeState;
 import Exceptions.*;
 
 import java.io.*;
@@ -21,8 +22,8 @@ public class Broker {
 	 * @throws FileNotFoundException: when the file required cannot be found
 	 * @throws wrongDataException: when the information in the file is incorrect 
 	 ********************************************************************************************/
-	public static int[][] readFile(String filename, int[] infoarray)throws FileNotFoundException, wrongDataException{
-		int intsplit=0;
+	public static byte[][] readFile(String filename, byte[] infoarray)throws FileNotFoundException, wrongDataException, InputMismatchException{
+		byte intsplit=0;
 		int max;
 		double totalcells=0;
 		double totalsand=0;
@@ -36,9 +37,9 @@ public class Broker {
 		String[] splitted = data.split(" ");
 		for (int i=0; i<6; i++) {
 			try {
-				intsplit = Integer.parseInt(splitted[i]);
+				intsplit = Byte.parseByte(splitted[i]);
 			}catch (Exception e){
-				throw new wrongDataException(100);
+					throw new wrongDataException(100);
 			}
 			infoarray[i] = intsplit;
 		}
@@ -46,7 +47,7 @@ public class Broker {
 		rows = infoarray[5];
 		columns = infoarray[4];
 		max = infoarray[3];
-		int[][] fieldarray = new int[rows][columns];
+		byte[][] fieldarray = new byte[rows][columns];
 		for (int i=0; i<rows; i ++) {
 			data = reader.nextLine();
 			data = data.replaceAll("\\s+", " ");
@@ -56,9 +57,9 @@ public class Broker {
 			}else{
 				for (int j=0; j<columns; j++) {
 					try {
-						intsplit = Integer.parseInt(splitted[j+1]);
+						intsplit = Byte.parseByte(splitted[j+1]);
 					}catch (Exception e) {
-						throw new wrongDataException(100);
+							throw new wrongDataException(100);
 					}
 					if (intsplit<0 || intsplit>max) {
 						throw new wrongDataException(203);
@@ -85,11 +86,12 @@ public class Broker {
 	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename,int[][] initialfield, int[] infoarray,int[] newPosition, String[] actions) throws IOException{
+	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, NodeState[] allStates) throws IOException{
 		int rows=infoarray[5];
 		int columns = infoarray[4];
 		int lines= rows+1;
 		String data[] = new String[lines];
+		String temporalRow= null;
 		for (int i=0; i<infoarray.length; i++) {
 			data[0]+=infoarray[i]+" ";
 		}
@@ -110,17 +112,17 @@ public class Broker {
 		writer.println("****The actions taken to reach the goal state are: ****");
 		for (int i=0; i<actions.length; i++) {
 			writer.println(actions[i]);
-		}
-		writer.println();
-		writer.println("****And the final state is: ****");
-		writer.println(newPosition[0]+" "+newPosition[1]+" "+infoarray[2]+" "+infoarray[3]+" "+infoarray[4]+" "+infoarray[5]);
-		for (int i=0; i<infoarray[4]; i++) {
-			for (int j=0; j<infoarray[5]; j++) {
-				writer.print(" "+infoarray[2]); //All cells will have a value equal to the objective amount
+			for (int j=0; j<allStates[i].getField().length; j++) {
+				for (int k=0; k<allStates[i].getField()[j].length; k++) {
+					temporalRow += " "+allStates[i].getField()[j][k]+" ";
+				}
+				temporalRow = temporalRow.replaceAll("null", "");
+				writer.println(temporalRow);
+				temporalRow = null;
 			}
-			writer.println();
 		}
 		writer.close();
+		System.out.println("File written correctly.\n");
 	}
 	
 	/**********************************************************************************************************************************
@@ -130,7 +132,7 @@ public class Broker {
 	 * @return: true if information is correct, false in other case
 	 * @throws wrongDataException: when the information in the file is incorrect
 	 **********************************************************************************************************************************/
-	private static void hasSense(int[] infoarray) throws wrongDataException {
+	private static void hasSense(byte[] infoarray) throws wrongDataException {
 		if (infoarray[0]>=infoarray[4]) {
 			throw new wrongDataException(200);
 		}

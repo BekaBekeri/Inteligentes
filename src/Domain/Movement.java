@@ -2,23 +2,23 @@ package Domain;
 
 public class Movement {
 
-	private int newX;
-	private int newY;
+	private byte newX;
+	private byte newY;
 	
-	public Movement(int x, int y) {
+	public Movement(byte x, byte y) {
 		newX = x;
 		newY = y;
 	}
-	public int getNewX() {
+	public byte getNewX() {
 		return newX;
 	}
-	public void setNewX(int newX) {
+	public void setNewX(byte newX) {
 		this.newX = newX;
 	}
-	public int getNewY() {
+	public byte getNewY() {
 		return newY;
 	}
-	public void setNewY(int newY) {
+	public void setNewY(byte newY) {
 		this.newY = newY;
 	}
 	

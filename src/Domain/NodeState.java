@@ -49,10 +49,10 @@ public class NodeState extends State implements Comparable<NodeState> {
 	public int compareTo(NodeState newState){
 		int r = 0;
 		
-		if(newState.getValue() > this.value){
+		if(newState.getCost() > this.cost){
 			r = -1;
 		}
-		else if(newState.getValue() < this.value){
+		else if(newState.getCost() < this.cost){
 			r = +1;
 		}
 		

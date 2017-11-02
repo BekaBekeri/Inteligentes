@@ -3,13 +3,13 @@ public class Action {
 	
 
 	private Movement newMove;
-	private int sandN;
-	private int sandS;
-	private int sandW;
-	private int sandE;
+	private byte sandN;
+	private byte sandS;
+	private byte sandW;
+	private byte sandE;
 	
 	
-	public Action(Movement newMove, int sandN, int sandE, int sandS, int sandW) {
+	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) {
 		super();
 		this.newMove = newMove;
 		this.sandN = sandN;
@@ -23,28 +23,28 @@ public class Action {
 		
 	}
 	
-	public int getSandN() {
+	public byte getSandN() {
 		return sandN;
 	}
-	public void setSandN(int sandN) {
+	public void setSandN(byte sandN) {
 		this.sandN = sandN;
 	}
-	public int getSandS() {
+	public byte getSandS() {
 		return sandS;
 	}
-	public void setSandS(int sandS) {
+	public void setSandS(byte sandS) {
 		this.sandS = sandS;
 	}
-	public int getSandW() {
+	public byte getSandW() {
 		return sandW;
 	}
-	public void setSandW(int sandW) {
+	public void setSandW(byte sandW) {
 		this.sandW = sandW;
 	}
-	public int getSandE() {
+	public byte getSandE() {
 		return sandE;
 	}
-	public void setSandE(int sandE) {
+	public void setSandE(byte sandE) {
 		this.sandE = sandE;
 	}
 

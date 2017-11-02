@@ -27,7 +27,7 @@ public class wrongDataException extends Exception{
 		String msg = "Error "+code+": ";
 		switch (code) {
 		case 100:
-			return msg+"Wrong format. Use only integers in the given file, please."+"\n";
+			return msg+"Wrong format. Use only integers in the range [0,127] in the given file, please."+"\n";
 		case 101:
 			return msg+"Wrong format. Field data must start with a blank space."+"\n";
 		case 200:
@@ -40,6 +40,8 @@ public class wrongDataException extends Exception{
 			return msg+"All field must have an integer and positive amount of sand, and it cannot be greater than the MAX."+"\n";
 		case 204:
 			return msg+"Mean of sand not equal to K (Objective amount). Please, introduce different information on the file."+"\n";
+		case 300:
+			return msg+"To avoid performance issues, the maximun number for all values has been limited from [0, 255]. Please modify the file";
 		default:
 			return "Unknown error";
 		}

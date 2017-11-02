@@ -44,6 +44,8 @@ public class ReadWriteFrame {
 			
 		}catch (wrongDataException wde) {
 			System.out.println(wde.getMessage());
+		}catch (InputMismatchException ime) {
+			System.out.println();
 		}catch (FileNotFoundException fnf) {
 			System.out.println("Error while looking for the file. Please chech that the name is correct.");
 		}catch (Exception e) {
@@ -60,15 +62,12 @@ public class ReadWriteFrame {
 	 * @return: a boolean, true in correct execution, false in other case
 	 */
 	
-	protected static boolean writeFile(String filename) {
-		boolean correctExec = false;
+	protected static void writeFile(String filename) {
 		try{
 			Domain.Control.write(filename);
-			correctExec=true;
 		}catch (Exception e) {
-			System.out.println("Error while trying to write in the file.");
+			System.out.println("Error while trying to write in the file.\n");
 		}
-		return correctExec;
 	}
 	
 }
