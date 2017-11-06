@@ -33,10 +33,10 @@ public class ReadWriteFrame {
 	 * @param filename: name of the file to be parsed
 	 * @return: a boolean, true in correct execution, false in other case
 	 **********************************************************************************************************/
-	protected static boolean readFile(String filename) {
+	protected static boolean readFile(String filename, int depth, String strategy) {
 		boolean solutionFound = false;
 		try {
-			if(Domain.Control.read(filename)) {
+			if(Domain.Control.read(filename, depth, strategy)) {
 				solutionFound=true;
 			}else {
 				solutionFound=false;
@@ -55,18 +55,24 @@ public class ReadWriteFrame {
 	}
 	
 	
-	/**
+	/***********************************************************************************************************
 	 * Method name: writeFile
 	 * Method description: method encharged of calling Control, in Domain package, to write information to a file
-	 * @param filename: the name of the filw to be written
-	 * @return: a boolean, true in correct execution, false in other case
-	 */
+	 * @param filename: the name of the file to be written
+	 * @throws IOException 
+	 ***********************************************************************************************************/
 	
-	protected static void writeFile(String filename) {
+	protected static void writeFile(String filename){
 		try{
 			Domain.Control.write(filename);
 		}catch (Exception e) {
 			System.out.println("Error while trying to write in the file.\n");
+			System.out.println("Trying to save in 'log.txt' instead. Placed in the parent directory of /src");
+			try {
+				Domain.Control.write("log.txt");
+			} catch (Exception elog) {
+				System.out.println("Not possible to save in log.txt. Finishing execution.");
+			}
 		}
 	}
 	

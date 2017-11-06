@@ -4,13 +4,22 @@ public class NodeState extends State implements Comparable<NodeState> {
 
 	private NodeState father = null; 
 	private Action appliedAction = null;
-	private int cost = 0;
+	private int cost;
 	private int value;
+	private int depth;
+	
 	
 	public NodeState() {
-		this.value = (int) Math.random()*2000000000 + 1;
 	}
 	
+	public int getDepth() {
+		return depth;
+	}
+
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}
+
 	public int getValue() {
 		return value;
 	}
@@ -45,14 +54,20 @@ public class NodeState extends State implements Comparable<NodeState> {
 		this.cost = cost;
 	}
 
+	
+	public void setStrategy(String strategy) {
+		if (strategy.equals("BFS")) value=depth;
+		if (strategy.equals("DFS")) value=-depth;
+		if (strategy.equals("UCS")) value = cost;
+	}
 
 	public int compareTo(NodeState newState){
 		int r = 0;
 		
-		if(newState.getCost() > this.cost){
+		if(newState.getValue() > this.value){
 			r = -1;
 		}
-		else if(newState.getCost() < this.cost){
+		else if(newState.getValue() < this.value){
 			r = +1;
 		}
 		

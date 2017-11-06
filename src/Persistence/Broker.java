@@ -109,18 +109,26 @@ public class Broker {
 		}
 		writer.println("(Above is our initial State)");
 		writer.println();
-		writer.println("****The actions taken to reach the goal state are: ****");
-		for (int i=0; i<actions.length; i++) {
-			writer.println(actions[i]);
-			for (int j=0; j<allStates[i].getField().length; j++) {
-				for (int k=0; k<allStates[i].getField()[j].length; k++) {
-					temporalRow += " "+allStates[i].getField()[j][k]+" ";
+		
+		if (actions!=null) {
+			writer.println("****The actions taken to reach the goal state are: ****");
+			for (int i=0; i<actions.length; i++) {
+				writer.println(actions[i]);
+				for (int j=0; j<allStates[i].getField().length; j++) {
+					for (int k=0; k<allStates[i].getField()[j].length; k++) {
+						temporalRow += " "+allStates[i].getField()[j][k]+" ";
+					}
+					temporalRow = temporalRow.replaceAll("null", "");
+					writer.println(temporalRow);
+					temporalRow = null;
 				}
-				temporalRow = temporalRow.replaceAll("null", "");
-				writer.println(temporalRow);
-				temporalRow = null;
 			}
+			writer.println();
+			writer.println("Depth of the solution: "+allStates[allStates.length-1].getDepth()+", with Cost: "+allStates[allStates.length-1].getCost());
+		}else {
+			writer.println("Initial state already accomplishes solution.");
 		}
+		
 		writer.close();
 		System.out.println("File written correctly.\n");
 	}

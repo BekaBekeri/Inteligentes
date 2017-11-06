@@ -18,6 +18,8 @@ public class Control {
 	private static NodeState initialState;
 	private static byte mean;
 	private static byte max;
+	private static int maxDepth=-1;
+	private static String strategyToUse = null;
 	
 	/***************************************************************************************************************
 	 * Method name: mainFunctionality
@@ -53,7 +55,7 @@ public class Control {
 		}
 		
 		if(frontier.isEmpty()){
-			System.out.println("No solution found.");
+			System.out.println("No solution found, using strategy: "+strategyToUse+ " , with Maximun Depth: "+maxDepth+".");
 			System.out.println();
 		}else{
 			if (isGoal(frontier.peek())){
@@ -163,7 +165,10 @@ public class Control {
 		newState.setTractorY(action.getNewMove().getNewY());
 		newState.setFather(state);
 		newState.setAppliedAction(action);
-		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1); //+1 cause the movement of the tractor
+		newState.setDepth(state.getDepth()+1);
+		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1);
+		newState.setStrategy(strategyToUse);
+		
 		byte centric = state.getPosition(state.getTractorX(), state.getTractorY());		
 		centric = (byte) (centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW());
 		newState.setPosition(state.getTractorX(), state.getTractorY(), centric);
@@ -250,10 +255,12 @@ public class Control {
 	 * @throws FileNotFoundException: on problems finding the file
 	 * @throws wrongDataException: on controlled errors
 	 ********************************************************************************************************/
-	public static boolean read(String filename) throws FileNotFoundException, wrongDataException, InputMismatchException {
+	public static boolean read(String filename, int depth, String strategy) throws FileNotFoundException, wrongDataException, InputMismatchException {
 		boolean resultAchieved;
 		byte[] infoarray = new byte[6];
 		byte[][] initialField = Persistence.Broker.readFile(filename, infoarray);
+		maxDepth = depth;
+		strategyToUse = strategy;
 		resultAchieved = mainFunctionality(infoarray, initialField);
 		return resultAchieved;
 	}
@@ -303,40 +310,54 @@ public class Control {
 
 	public static void succesor(List<Action> actionList, NodeState currentState){
 		for(int i = 0; i < actionList.size(); i++){
-			frontier.add(applyAction(currentState, actionList.get(i)));
+			if (currentState.getDepth() < maxDepth) {
+				frontier.add(applyAction(currentState, actionList.get(i)));
+			}
 		}	
 	}
 
 	public static void createSolutionActions() {
 		NodeState father = finalstate.getFather();
 		NodeState currentState = finalstate;
+		int finalCost = finalstate.getCost();
+		int finalDepth = finalstate.getDepth();
 		
 		Stack<String> actionstack = new Stack<String>();
 		Stack<NodeState> statestack = new Stack<NodeState>();
 
-		while(currentState.getFather()!=null) {
-			actionstack.push(currentState.getAppliedAction().toString(father));
-			statestack.push(currentState);
-			father=father.getFather();
-			currentState=currentState.getFather();
-		}
-		finalactions = new String[actionstack.size()];
-		orderedStates = new NodeState[statestack.size()];
-		
-		System.out.println("List of actions in order to reach the goal state: ");
-		
-		for (int i=0; i<actionstack.size()+1; i++) {
-			System.out.println(actionstack.peek());
+		if (finalDepth==0) {
+			System.out.println("Initial state already accomplishes objective.");
+		}else {
 			
-			for (int j=0; j<statestack.peek().getField().length; j++) {
-				for (int k=0; k<statestack.peek().getField()[j].length; k++) {
-					System.out.print(statestack.peek().getField()[j][k]+" ");
-				}
-				System.out.print("\n");
+			while(currentState.getFather()!=null) {
+				actionstack.push(currentState.getAppliedAction().toString(father));
+				statestack.push(currentState);
+				father=father.getFather();
+				currentState=currentState.getFather();
 			}
-			orderedStates[i]=statestack.pop();
-			finalactions[i]=actionstack.pop();
+			finalactions = new String[actionstack.size()];
+			orderedStates = new NodeState[statestack.size()];
+			
+			System.out.println("List of actions in order to reach the goal state: ");
+			System.out.println();
+			if (!actionstack.isEmpty()) {
+				for (int i=0; i<actionstack.size()+2; i++) {
+					System.out.println(actionstack.peek());
+					
+					for (int j=0; j<statestack.peek().getField().length; j++) {
+						for (int k=0; k<statestack.peek().getField()[j].length; k++) {
+							System.out.print(statestack.peek().getField()[j][k]+" ");
+						}
+						System.out.print("\n");
+					}
+					orderedStates[i]=statestack.pop();
+					finalactions[i]=actionstack.pop();
+				}
+			}
+			System.out.println();
+			System.out.println("Total cost to reach solution: "+finalCost+", Depth of the solution: "+finalDepth+".");
 		}
+		
 	}
 	
 }
