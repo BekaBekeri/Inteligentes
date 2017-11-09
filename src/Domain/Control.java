@@ -19,6 +19,7 @@ public class Control {
 	private static byte mean;
 	private static byte max;
 	private static int maxDepth=-1;
+	private static int currentDepth=0;
 	private static String strategyToUse = null;
 	
 	/***************************************************************************************************************
@@ -31,28 +32,41 @@ public class Control {
 	 **************************************************************************************************************/
 	public static boolean mainFunctionality(byte[] infoarray, byte[][]initialField){
 		
+		if (strategyToUse.equals("IDS")) {
+			currentDepth=0;
+		}else {
+			currentDepth=maxDepth;
+		}
+		
 		frontier = new PriorityQueue<NodeState>();
 		
 		initialState = new NodeState();
 		initialState.setTractorX(infoarray[0]);
 		initialState.setTractorY(infoarray[1]);
+		initialState.setField(initialField);
 		
 		mean = infoarray[2];
 		max = infoarray[3];
 		
 		boolean solutionFound=false;
 		
-		initialState.setField(initialField);
-		
 		List<Action> actionList = null;
-		frontier.add(initialState);
-		
 		System.out.println("Execution started. Please wait while our program looks for a solution.");
 		
-		while(!frontier.isEmpty() && !isGoal(frontier.peek())){
-			actionList=generateActions(frontier.peek());
-			succesor(actionList, frontier.poll());
-		}
+		do {
+			
+			frontier.clear();
+			frontier.add(initialState);
+			
+			while(!frontier.isEmpty() && !isGoal(frontier.peek())){
+				
+				actionList=generateActions(frontier.peek());
+				succesor(actionList, frontier.poll());
+			}
+			
+			currentDepth++;
+			
+		}while(currentDepth<=maxDepth && frontier.isEmpty());
 		
 		if(frontier.isEmpty()){
 			System.out.println("No solution found, using strategy: "+strategyToUse+ " , with Maximun Depth: "+maxDepth+".");
@@ -79,8 +93,8 @@ public class Control {
 	 * @param state: the state that determines what actions can and cannot be taken
 	 * @return
 	 ****************************************************************************************************/
-	public static List<Action> generateActions(State state){
-		List<Action> actionList = new ArrayList<Action>();
+	public static List<Action> generateActions(NodeState state){
+		List<Action> actionList = new ArrayList<Action>();	
 		List<Movement> movementList = generateMovements(state);
 	    byte[] auxA = new byte[4];
 	   
@@ -118,6 +132,15 @@ public class Control {
 	    		}
 	  		}
 	    } 
+	    
+	    if (actionList.isEmpty()) {
+	    	for( int mov = 0; mov < movementList.size(); mov++){
+				Movement move = new Movement(movementList.get(mov).getNewX(), movementList.get(mov).getNewY());
+				Action auxAction = new Action(move,(byte) 0,(byte) 0,(byte) 0,(byte) 0);
+				actionList.add(auxAction);
+			}
+	    }
+	    
 		return actionList;
 	}
 	
@@ -160,7 +183,7 @@ public class Control {
 		
 		NodeState newState = new NodeState();
 		
-		newState.setField(state.getField());
+		newState.setField(state.copyField());
 		newState.setTractorX(action.getNewMove().getNewX());
 		newState.setTractorY(action.getNewMove().getNewY());
 		newState.setFather(state);
@@ -285,7 +308,7 @@ public class Control {
 		newPosition[0]=finalstate.getTractorX();
 		newPosition[1]=finalstate.getTractorY();
 		
-		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, orderedStates);
+		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, orderedStates, strategyToUse);
 	}
 	
 	/************************************************************************************************************
@@ -294,7 +317,7 @@ public class Control {
 	 * @param state: the state we want to check
 	 * @return boolean depending 
 	 *************************************************************************************************************/
-	public static boolean isGoal(State state){
+	public static boolean isGoal(NodeState state){
 		boolean aux = true;
 		
 		for(int i = 0; i < state.getField().length; i++){
@@ -310,13 +333,17 @@ public class Control {
 
 	public static void succesor(List<Action> actionList, NodeState currentState){
 		for(int i = 0; i < actionList.size(); i++){
-			if (currentState.getDepth() < maxDepth) {
+			if (currentState.getDepth() < currentDepth) {
+				//Duplicates
 				frontier.add(applyAction(currentState, actionList.get(i)));
 			}
 		}	
 	}
 
 	public static void createSolutionActions() {
+		
+		int totalNumber=0;
+		
 		NodeState father = finalstate.getFather();
 		NodeState currentState = finalstate;
 		int finalCost = finalstate.getCost();
@@ -337,13 +364,14 @@ public class Control {
 			}
 			finalactions = new String[actionstack.size()];
 			orderedStates = new NodeState[statestack.size()];
+			totalNumber= actionstack.size();
 			
 			System.out.println("List of actions in order to reach the goal state: ");
 			System.out.println();
+			
 			if (!actionstack.isEmpty()) {
-				for (int i=0; i<actionstack.size()+2; i++) {
+				for (int i=0; i<totalNumber; i++) {
 					System.out.println(actionstack.peek());
-					
 					for (int j=0; j<statestack.peek().getField().length; j++) {
 						for (int k=0; k<statestack.peek().getField()[j].length; k++) {
 							System.out.print(statestack.peek().getField()[j][k]+" ");

@@ -15,7 +15,11 @@ public class State{
 	public State() {
 	}
 
-	public byte[][] getField() {
+	public byte[][] getField(){
+		return this.field;
+	}
+	
+	public byte[][] copyField() {
 		byte [][] aux=new byte[field.length][field[0].length];
 		for(int i=0;i<aux.length;i++) {
 			System.arraycopy(field[i], 0, aux[i], 0, field[0].length);

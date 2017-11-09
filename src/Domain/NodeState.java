@@ -57,7 +57,7 @@ public class NodeState extends State implements Comparable<NodeState> {
 	
 	public void setStrategy(String strategy) {
 		if (strategy.equals("BFS")) value=depth;
-		if (strategy.equals("DFS")) value=-depth;
+		if (strategy.equals("DFS") || strategy.equals("IDS")) value=-depth;
 		if (strategy.equals("UCS")) value = cost;
 	}
 

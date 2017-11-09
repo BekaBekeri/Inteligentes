@@ -86,7 +86,7 @@ public class Broker {
 	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, NodeState[] allStates) throws IOException{
+	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, NodeState[] allStates, String strategy) throws IOException{
 		int rows=infoarray[5];
 		int columns = infoarray[4];
 		int lines= rows+1;
@@ -125,6 +125,7 @@ public class Broker {
 			}
 			writer.println();
 			writer.println("Depth of the solution: "+allStates[allStates.length-1].getDepth()+", with Cost: "+allStates[allStates.length-1].getCost());
+			writer.println("Solution found with strategy: "+strategy+".");
 		}else {
 			writer.println("Initial state already accomplishes solution.");
 		}
