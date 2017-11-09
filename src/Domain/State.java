@@ -5,14 +5,10 @@ public class State{
 	private byte tractorX;
 	private byte tractorY;
 	
-	public State(byte[][] field, byte tractorX, byte tractorY, int mean, int max) {
+	public State(byte[][] field, byte tractorX, byte tractorY) {
 		this.field = field;
 		this.tractorX = tractorX;
 		this.tractorY = tractorY;
-	}
-
-	
-	public State() {
 	}
 
 	public byte[][] getField(){
@@ -25,10 +21,6 @@ public class State{
 			System.arraycopy(field[i], 0, aux[i], 0, field[0].length);
 		}
 		return aux;
-	}
-
-	public void setField(byte[][] field) {
-		this.field = field;
 	}
 
 	public byte getTractorX() {

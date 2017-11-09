@@ -1,8 +1,7 @@
 package Domain;
 public class Action {
-	
 
-	private Movement newMove;
+	private Movement move;
 	private byte sandN;
 	private byte sandS;
 	private byte sandW;
@@ -11,7 +10,7 @@ public class Action {
 	
 	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) {
 		super();
-		this.newMove = newMove;
+		this.move = newMove;
 		this.sandN = sandN;
 		this.sandS = sandS;
 		this.sandW = sandW;
@@ -49,17 +48,17 @@ public class Action {
 	}
 
 	public Movement getNewMove() {
-		return newMove;
+		return move;
 	}
 
 	public void setNewMove(Movement newMove) {
-		this.newMove = newMove;
+		this.move = newMove;
 	}
 	
 	public String toString(State state){
 		String aux = "";
 		
-		aux = "(" + newMove.getNewX() + ", " + newMove.getNewY() + "), [(" + sandN + ", (" + 
+		aux = "(" + move.getNewX() + ", " + move.getNewY() + "), [(" + sandN + ", (" + 
 			  (state.getTractorX()-1) + ", " + state.getTractorY() + ")), ("+ sandE + ", (" + 
 			  state.getTractorX() + ", " + (state.getTractorY()+1) + ")), ("+ sandS + ", (" + 
 			  (state.getTractorX()+1) + ", " + state.getTractorY() + ")), (" + sandW + ", (" + 

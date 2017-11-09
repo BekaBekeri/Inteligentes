@@ -12,10 +12,10 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static String[] finalactions;
-	private static NodeState[] orderedStates;
-	private static PriorityQueue<NodeState> frontier;
-	private static NodeState finalstate;
-	private static NodeState initialState;
+	private static Node[] orderedStates;
+	private static PriorityQueue<Node> frontier;
+	private static Node finalNode;
+	private static State initialState;
 	private static byte mean;
 	private static byte max;
 	private static int maxDepth=-1;
@@ -38,12 +38,10 @@ public class Control {
 			currentDepth=maxDepth;
 		}
 		
-		frontier = new PriorityQueue<NodeState>();
+		frontier = new PriorityQueue<Node>();
 		
-		initialState = new NodeState();
-		initialState.setTractorX(infoarray[0]);
-		initialState.setTractorY(infoarray[1]);
-		initialState.setField(initialField);
+		initialState = new State(initialField, infoarray[0], infoarray[1]);
+		Node initialNode = new Node(null, initialState, null, 0, 0, strategyToUse);
 		
 		mean = infoarray[2];
 		max = infoarray[3];
@@ -56,9 +54,9 @@ public class Control {
 		do {
 			
 			frontier.clear();
-			frontier.add(initialState);
+			frontier.add(initialNode);
 			
-			while(!frontier.isEmpty() && !isGoal(frontier.peek())){
+			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
 				
 				actionList=generateActions(frontier.peek());
 				succesor(actionList, frontier.poll());
@@ -72,10 +70,10 @@ public class Control {
 			System.out.println("No solution found, using strategy: "+strategyToUse+ " , with Maximun Depth: "+maxDepth+".");
 			System.out.println();
 		}else{
-			if (isGoal(frontier.peek())){
+			if (isGoal(frontier.peek().getState())){
 				System.out.println("Solution found");
 				System.out.println();
-				finalstate = frontier.poll();
+				finalNode = frontier.poll();
 				createSolutionActions();
 				solutionFound = true;
 				System.out.println();
@@ -93,32 +91,33 @@ public class Control {
 	 * @param state: the state that determines what actions can and cannot be taken
 	 * @return
 	 ****************************************************************************************************/
-	public static List<Action> generateActions(NodeState state){
+	public static List<Action> generateActions(Node currentNode){
 		List<Action> actionList = new ArrayList<Action>();	
-		List<Movement> movementList = generateMovements(state);
+		List<Movement> movementList = generateMovements(currentNode);
+		State currentState = currentNode.getState();
 	    byte[] auxA = new byte[4];
 	   
-	    for(byte n = 0; n <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; n ++){
+	    for(byte n = 0; n <= currentState.getPosition(currentState.getTractorX(), currentState.getTractorY()) - mean; n ++){
 	    	
-	    	for(byte e = 0; e <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; e++){
+	    	for(byte e = 0; e <= currentState.getPosition(currentState.getTractorX(), currentState.getTractorY()) - mean; e++){
 	    	
-	    		for(byte s = 0; s <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; s++){
+	    		for(byte s = 0; s <= currentState.getPosition(currentState.getTractorX(), currentState.getTractorY()) - mean; s++){
 	    		
-	    			for(byte w = 0; w <= state.getPosition(state.getTractorX(), state.getTractorY()) - mean; w++){
+	    			for(byte w = 0; w <= currentState.getPosition(currentState.getTractorX(), currentState.getTractorY()) - mean; w++){
 	    			 
 	    				auxA[0] = n;		//NORTH MOVED SAND
 	    				auxA[1] = e;		//EAST MOVED SAND
 	    				auxA[2] = s;		//SOUTH MOVED SAND
 	    				auxA[3] = w;		//WEST MOVED SAND
 	    				
-	    				if(n+e+s+w == state.getPosition(state.getTractorX(), state.getTractorY()) - mean){
+	    				if(n+e+s+w == currentState.getPosition(currentState.getTractorX(), currentState.getTractorY()) - mean){
 	    	    			
-	    					if( !((n > 0) && (state.getTractorX() == 0)) &&
-		    					!((e > 0) && (state.getTractorY() == state.getField()[0].length - 1)) &&
-		    					!((s > 0) && (state.getTractorX() == state.getField().length - 1)) &&
-		    					!((w > 0) && (state.getTractorY() == 0))){
+	    					if( !((n > 0) && (currentState.getTractorX() == 0)) &&
+		    					!((e > 0) && (currentState.getTractorY() == currentState.getField()[0].length - 1)) &&
+		    					!((s > 0) && (currentState.getTractorX() == currentState.getField().length - 1)) &&
+		    					!((w > 0) && (currentState.getTractorY() == 0))){
 	    							
-		    					if(isPossibleSand(auxA, state)) {
+		    					if(isPossibleSand(auxA, currentState)) {
 		    						for( int mov = 0; mov < movementList.size(); mov++){
 			    						Movement move = new Movement(movementList.get(mov).getNewX(),
 			    													 movementList.get(mov).getNewY());
@@ -150,23 +149,25 @@ public class Control {
 	 * @param state: an object of the class State that contains the information of the current state
 	 * @return
 	 *******************************************************************************************************/
-	private static List<Movement> generateMovements(State state) {
-		List<Movement> movementList = new ArrayList<Movement>();
+	private static List<Movement> generateMovements(Node node) {
 		
-		if (state.getTractorX()-1 >=0 ) {
-			Movement north = new Movement((byte) (state.getTractorX()-1), state.getTractorY());
+		List<Movement> movementList = new ArrayList<Movement>();
+		State currentState = node.getState();
+		
+		if (currentState.getTractorX()-1 >=0 ) {
+			Movement north = new Movement((byte) (currentState.getTractorX()-1), currentState.getTractorY());
 			movementList.add(north);
 		}
-		if (!(state.getTractorY()+1 >= state.getField().length)) {
-			Movement east = new Movement(state.getTractorX(),(byte) (state.getTractorY()+1));
+		if (!(currentState.getTractorY()+1 >= currentState.getField().length)) {
+			Movement east = new Movement(currentState.getTractorX(),(byte) (currentState.getTractorY()+1));
 			movementList.add(east);
 		}
-		if (!(state.getTractorX()+1 >= state.getField().length)){
-			Movement south = new Movement((byte) (state.getTractorX()+1), state.getTractorY());
+		if (!(currentState.getTractorX()+1 >= currentState.getField().length)){
+			Movement south = new Movement((byte) (currentState.getTractorX()+1), currentState.getTractorY());
 			movementList.add(south);
 		}
-		if (state.getTractorY()-1 >=0) {
-			Movement west = new Movement(state.getTractorX(), (byte) (state.getTractorY()-1));
+		if (currentState.getTractorY()-1 >=0) {
+			Movement west = new Movement(currentState.getTractorX(), (byte) (currentState.getTractorY()-1));
 			movementList.add(west);
 		}
 		return movementList;
@@ -179,61 +180,54 @@ public class Control {
 	 * @param action: action that is going to be performed
 	 * @return: the new state after the changes done by action
 	 *************************************************************************************************/
-	public static NodeState applyAction(NodeState state, Action action){
+	public static Node applyAction(Node fatherNode, Action action){
 		
-		NodeState newState = new NodeState();
+
+		int depth = fatherNode.getDepth()+1;
+		int cost = fatherNode.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1;
 		
-		newState.setField(state.copyField());
-		newState.setTractorX(action.getNewMove().getNewX());
-		newState.setTractorY(action.getNewMove().getNewY());
-		newState.setFather(state);
-		newState.setAppliedAction(action);
-		newState.setDepth(state.getDepth()+1);
-		newState.setCost(state.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1);
-		newState.setStrategy(strategyToUse);
+		State fatherState = fatherNode.getState();
+		State currentState = new State (fatherState.copyField(), fatherState.getTractorX(), fatherState.getTractorY());
+		Node currentNode = new Node(fatherNode, currentState, action, cost, depth, strategyToUse);
 		
-		byte centric = state.getPosition(state.getTractorX(), state.getTractorY());		
+		byte centric = fatherState.getPosition(fatherState.getTractorX(), fatherState.getTractorY());		
 		centric = (byte) (centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW());
-		newState.setPosition(state.getTractorX(), state.getTractorY(), centric);
+		currentState.setPosition(fatherState.getTractorX(), fatherState.getTractorY(), centric);
 		
-		if((action.getSandN()>0) && (state.getTractorX() - 1 >= 0)){
-			byte northValue = state.getPosition((byte) (state.getTractorX() - 1), state.getTractorY());
+		if((action.getSandN()>0) && (fatherState.getTractorX() - 1 >= 0)){
+			byte northValue = fatherState.getPosition((byte) (fatherState.getTractorX() - 1), fatherState.getTractorY());
 			if ((northValue + action.getSandN())<= max) {
 				northValue = (byte) (northValue + action.getSandN());
-				newState.setPosition((byte) (state.getTractorX() -1), state.getTractorY(), northValue);
+				currentState.setPosition((byte) (fatherState.getTractorX() -1), fatherState.getTractorY(), northValue);
 			}
 		}
 		
-		if((action.getSandE()>0) && (state.getTractorY() + 1 < state.getField()[0].length)){
-			byte eastValue = state.getPosition(state.getTractorX(), (byte) (state.getTractorY() + 1));
+		if((action.getSandE()>0) && (fatherState.getTractorY() + 1 < fatherState.getField()[0].length)){
+			byte eastValue = fatherState.getPosition(fatherState.getTractorX(), (byte) (fatherState.getTractorY() + 1));
 			if ((eastValue + action.getSandE())<= max) {
 				eastValue = (byte) (eastValue + action.getSandE());
-				newState.setPosition(state.getTractorX(),(byte) (state.getTractorY() + 1), eastValue);
+				currentState.setPosition(fatherState.getTractorX(),(byte) (fatherState.getTractorY() + 1), eastValue);
 			}
 		}
 		
-		if((action.getSandS()>0) && state.getTractorX() + 1 < state.getField().length){
-			byte southValue = state.getPosition((byte) (state.getTractorX() + 1), state.getTractorY());
+		if((action.getSandS()>0) && fatherState.getTractorX() + 1 < fatherState.getField().length){
+			byte southValue = fatherState.getPosition((byte) (fatherState.getTractorX() + 1), fatherState.getTractorY());
 			if ((southValue + action.getSandS()) <= max) {
 				southValue = (byte) (southValue + action.getSandS());
-				newState.setPosition((byte) (state.getTractorX() +1), state.getTractorY(), southValue);
+				currentState.setPosition((byte) (fatherState.getTractorX() +1), fatherState.getTractorY(), southValue);
 			}
 		}
 		
-		if((action.getSandW()>0) && (state.getTractorY() - 1 >= 0)){
-			byte westValue = state.getPosition(state.getTractorX() , (byte) (state.getTractorY() - 1));
+		if((action.getSandW()>0) && (fatherState.getTractorY() - 1 >= 0)){
+			byte westValue = fatherState.getPosition(fatherState.getTractorX() , (byte) (fatherState.getTractorY() - 1));
 			if ((westValue + action.getSandW()) <= max) {
 				westValue = (byte) (westValue + action.getSandW());
-				newState.setPosition(state.getTractorX() , (byte) (state.getTractorY() - 1), westValue);
+				currentState.setPosition(fatherState.getTractorX() , (byte) (fatherState.getTractorY() - 1), westValue);
 			}
 			
 		}
 		
-		if(newState.equals(state)) {
-			return null;
-		}
-		
-		return newState;
+		return currentNode;
 	}
 	
 	/*******************************************************************************************************
@@ -243,25 +237,25 @@ public class Control {
 	 * @param current: current state of the field
 	 * @return: a boolean, true if is possible to move sand, false in other case
 	 ******************************************************************************************************/
-	private static boolean isPossibleSand(byte[] sandToMove, State current) {
+	private static boolean isPossibleSand(byte[] sandToMove, State currentState) {
 		boolean check=true;
 			if (sandToMove[0]>0) {
-				if (current.getPosition((byte) (current.getTractorX()-1), current.getTractorY())+sandToMove[0]>max){
+				if (currentState.getPosition((byte) (currentState.getTractorX()-1), currentState.getTractorY())+sandToMove[0]>max){
 					check=false;
 				}
 			}
 			if (sandToMove[1]>0) {
-				if (current.getPosition(current.getTractorX(),(byte) (current.getTractorY()+1))+sandToMove[1]>max){
+				if (currentState.getPosition(currentState.getTractorX(),(byte) (currentState.getTractorY()+1))+sandToMove[1]>max){
 					check=false;
 				}
 			}	
 			if (sandToMove[2]>0) {
-				if (current.getPosition((byte) (current.getTractorX()+1), current.getTractorY())+sandToMove[2]>max){
+				if (currentState.getPosition((byte) (currentState.getTractorX()+1), currentState.getTractorY())+sandToMove[2]>max){
 					check=false;
 				}
 			}
 			if (sandToMove[3]>0) {
-				if (current.getPosition(current.getTractorX(), (byte) (current.getTractorY()-1))+sandToMove[3]>max){
+				if (currentState.getPosition(currentState.getTractorX(), (byte) (currentState.getTractorY()-1))+sandToMove[3]>max){
 					check=false;
 				}
 			}
@@ -297,6 +291,7 @@ public class Control {
 	 public static void write(String filename) throws IOException {
 		byte[] infoarray = new byte[6];
 		byte[] newPosition = new byte[2];
+		State finalState = finalNode.getState();
 		
 		infoarray[0] = initialState.getTractorX();
 		infoarray[1] = initialState.getTractorY();
@@ -305,8 +300,8 @@ public class Control {
 		infoarray[4] = (byte) initialState.getField().length;
 		infoarray[5] = (byte) initialState.getField()[0].length;
 		
-		newPosition[0]=finalstate.getTractorX();
-		newPosition[1]=finalstate.getTractorY();
+		newPosition[0]=finalState.getTractorX();
+		newPosition[1]=finalState.getTractorY();
 		
 		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, orderedStates, strategyToUse);
 	}
@@ -317,9 +312,9 @@ public class Control {
 	 * @param state: the state we want to check
 	 * @return boolean depending 
 	 *************************************************************************************************************/
-	public static boolean isGoal(NodeState state){
+	public static boolean isGoal(State state){
 		boolean aux = true;
-		
+	
 		for(int i = 0; i < state.getField().length; i++){
 			for(int j = 0; j < state.getField()[0].length; j++){
 				if(state.getField()[i][j] != mean){
@@ -327,15 +322,16 @@ public class Control {
 				}
 			}
 		}
+		
 		return aux;
 	}
 
 
-	public static void succesor(List<Action> actionList, NodeState currentState){
+	public static void succesor(List<Action> actionList, Node currentNode){
 		for(int i = 0; i < actionList.size(); i++){
-			if (currentState.getDepth() < currentDepth) {
+			if (currentNode.getDepth() < currentDepth) {
 				//Duplicates
-				frontier.add(applyAction(currentState, actionList.get(i)));
+				frontier.add(applyAction(currentNode, actionList.get(i)));
 			}
 		}	
 	}
@@ -344,42 +340,42 @@ public class Control {
 		
 		int totalNumber=0;
 		
-		NodeState father = finalstate.getFather();
-		NodeState currentState = finalstate;
-		int finalCost = finalstate.getCost();
-		int finalDepth = finalstate.getDepth();
+		Node fatherNode = finalNode.getFather();
+		Node currentNode = finalNode;
+		int finalCost = finalNode.getCost();
+		int finalDepth = finalNode.getDepth();
 		
-		Stack<String> actionstack = new Stack<String>();
-		Stack<NodeState> statestack = new Stack<NodeState>();
+		Stack<String> actionStack = new Stack<String>();
+		Stack<Node> nodeStack = new Stack<Node>();
 
 		if (finalDepth==0) {
 			System.out.println("Initial state already accomplishes objective.");
 		}else {
 			
-			while(currentState.getFather()!=null) {
-				actionstack.push(currentState.getAppliedAction().toString(father));
-				statestack.push(currentState);
-				father=father.getFather();
-				currentState=currentState.getFather();
+			while(currentNode.getFather()!=null) {
+				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
+				nodeStack.push(currentNode);
+				fatherNode=fatherNode.getFather();
+				currentNode=currentNode.getFather();
 			}
-			finalactions = new String[actionstack.size()];
-			orderedStates = new NodeState[statestack.size()];
-			totalNumber= actionstack.size();
+			finalactions = new String[actionStack.size()];
+			orderedStates = new Node[nodeStack.size()];
+			totalNumber= actionStack.size();
 			
 			System.out.println("List of actions in order to reach the goal state: ");
 			System.out.println();
 			
-			if (!actionstack.isEmpty()) {
+			if (!actionStack.isEmpty()) {
 				for (int i=0; i<totalNumber; i++) {
-					System.out.println(actionstack.peek());
-					for (int j=0; j<statestack.peek().getField().length; j++) {
-						for (int k=0; k<statestack.peek().getField()[j].length; k++) {
-							System.out.print(statestack.peek().getField()[j][k]+" ");
+					System.out.println(actionStack.peek());
+					for (int j=0; j<nodeStack.peek().getState().getField().length; j++) {
+						for (int k=0; k<nodeStack.peek().getState().getField()[j].length; k++) {
+							System.out.print(nodeStack.peek().getState().getField()[j][k]+" ");
 						}
 						System.out.print("\n");
 					}
-					orderedStates[i]=statestack.pop();
-					finalactions[i]=actionstack.pop();
+					orderedStates[i]=nodeStack.pop();
+					finalactions[i]=actionStack.pop();
 				}
 			}
 			System.out.println();
