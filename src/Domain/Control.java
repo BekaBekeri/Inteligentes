@@ -59,7 +59,7 @@ public class Control {
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
 				
 				actionList=generateActions(frontier.peek());
-				succesor(actionList, frontier.poll());
+				successor(actionList, frontier.poll());
 			}
 			
 			currentDepth++;
@@ -88,7 +88,7 @@ public class Control {
 	/******************************************************************************************************
 	 * Method name: generateActions
 	 * Method description: method encharged of generating the possible actions given certain conditions
-	 * @param state: the state that determines what actions can and cannot be taken
+	 * @param node: the node that determines what actions can and cannot be taken
 	 * @return
 	 ****************************************************************************************************/
 	public static List<Action> generateActions(Node currentNode){
@@ -146,7 +146,7 @@ public class Control {
 	/*******************************************************************************************************
 	 * Method name: generateMovements
 	 * Method description: method encharged of creating the possible movements of the truck
-	 * @param state: an object of the class State that contains the information of the current state
+	 * @param node: an object of the class Node that contains the information of the current node
 	 * @return
 	 *******************************************************************************************************/
 	private static List<Movement> generateMovements(Node node) {
@@ -175,13 +175,12 @@ public class Control {
 
 	/*************************************************************************************************
 	 * Method name: applyAction
-	 * Method description: method encharged of applying a given action to an initial state
-	 * @param state: initial state to which the action is going to be applied
+	 * Method description: method encharged of applying a given action to a node
+	 * @param fatherNode: father node to which the action is going to be applied
 	 * @param action: action that is going to be performed
-	 * @return: the new state after the changes done by action
+	 * @return: the new node after the changes done by action
 	 *************************************************************************************************/
 	public static Node applyAction(Node fatherNode, Action action){
-		
 
 		int depth = fatherNode.getDepth()+1;
 		int cost = fatherNode.getCost() + action.getSandN() + action.getSandE() + action.getSandS() + action.getSandW() + 1;
@@ -192,40 +191,43 @@ public class Control {
 		
 		byte centric = fatherState.getPosition(fatherState.getTractorX(), fatherState.getTractorY());		
 		centric = (byte) (centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW());
-		currentState.setPosition(fatherState.getTractorX(), fatherState.getTractorY(), centric);
+		currentState.setPosition(currentState.getTractorX(), currentState.getTractorY(), centric);
 		
-		if((action.getSandN()>0) && (fatherState.getTractorX() - 1 >= 0)){
-			byte northValue = fatherState.getPosition((byte) (fatherState.getTractorX() - 1), fatherState.getTractorY());
+		if((action.getSandN()>0) && (currentState.getTractorX() - 1 >= 0)){
+			byte northValue = currentState.getPosition((byte) (currentState.getTractorX() - 1), currentState.getTractorY());
 			if ((northValue + action.getSandN())<= max) {
 				northValue = (byte) (northValue + action.getSandN());
-				currentState.setPosition((byte) (fatherState.getTractorX() -1), fatherState.getTractorY(), northValue);
+				currentState.setPosition((byte) (currentState.getTractorX() -1), currentState.getTractorY(), northValue);
 			}
 		}
 		
-		if((action.getSandE()>0) && (fatherState.getTractorY() + 1 < fatherState.getField()[0].length)){
-			byte eastValue = fatherState.getPosition(fatherState.getTractorX(), (byte) (fatherState.getTractorY() + 1));
+		if((action.getSandE()>0) && (currentState.getTractorY() + 1 < currentState.getField()[0].length)){
+			byte eastValue = currentState.getPosition(currentState.getTractorX(), (byte) (currentState.getTractorY() + 1));
 			if ((eastValue + action.getSandE())<= max) {
 				eastValue = (byte) (eastValue + action.getSandE());
-				currentState.setPosition(fatherState.getTractorX(),(byte) (fatherState.getTractorY() + 1), eastValue);
+				currentState.setPosition(currentState.getTractorX(),(byte) (currentState.getTractorY() + 1), eastValue);
 			}
 		}
 		
-		if((action.getSandS()>0) && fatherState.getTractorX() + 1 < fatherState.getField().length){
-			byte southValue = fatherState.getPosition((byte) (fatherState.getTractorX() + 1), fatherState.getTractorY());
+		if((action.getSandS()>0) && currentState.getTractorX() + 1 < currentState.getField().length){
+			byte southValue = currentState.getPosition((byte) (currentState.getTractorX() + 1), currentState.getTractorY());
 			if ((southValue + action.getSandS()) <= max) {
 				southValue = (byte) (southValue + action.getSandS());
-				currentState.setPosition((byte) (fatherState.getTractorX() +1), fatherState.getTractorY(), southValue);
+				currentState.setPosition((byte) (currentState.getTractorX() +1), currentState.getTractorY(), southValue);
 			}
 		}
 		
-		if((action.getSandW()>0) && (fatherState.getTractorY() - 1 >= 0)){
-			byte westValue = fatherState.getPosition(fatherState.getTractorX() , (byte) (fatherState.getTractorY() - 1));
+		if((action.getSandW()>0) && (currentState.getTractorY() - 1 >= 0)){
+			byte westValue = currentState.getPosition(currentState.getTractorX() , (byte) (currentState.getTractorY() - 1));
 			if ((westValue + action.getSandW()) <= max) {
 				westValue = (byte) (westValue + action.getSandW());
-				currentState.setPosition(fatherState.getTractorX() , (byte) (fatherState.getTractorY() - 1), westValue);
+				currentState.setPosition(currentState.getTractorX() , (byte) (currentState.getTractorY() - 1), westValue);
 			}
 			
 		}
+		
+		currentState.setTractorX(action.getNewMove().getNewX());
+		currentState.setTractorY(action.getNewMove().getNewY());
 		
 		return currentNode;
 	}
@@ -268,6 +270,8 @@ public class Control {
 	 * Method name: read
 	 * Method description: Method encharged of calling the Broker of persistence in order to read a file
 	 * @param filename: name of the file to be read
+	 * @param depth: the maximum depth
+	 * @param strategy: the name of the strategy to be applied 
 	 * @return 
 	 * @throws FileNotFoundException: on problems finding the file
 	 * @throws wrongDataException: on controlled errors
@@ -326,8 +330,14 @@ public class Control {
 		return aux;
 	}
 
+	/*************************************************************************************************************
+	 * Method name: successor
+	 * Method description: generate all the successors of a given node and add them to the frontier
+	 * @param actionList: the list of the actions to be applied
+	 * @param currentNode: the node where we apply the actions
+	 *************************************************************************************************************/
 
-	public static void succesor(List<Action> actionList, Node currentNode){
+	public static void successor(List<Action> actionList, Node currentNode){
 		for(int i = 0; i < actionList.size(); i++){
 			if (currentNode.getDepth() < currentDepth) {
 				//Duplicates
@@ -336,6 +346,12 @@ public class Control {
 		}	
 	}
 
+	
+	/*************************************************************************************************************
+	 * Method name: createSolutionActions
+	 * Method description: Sort the final solution and print it on the screen
+	 *************************************************************************************************************/
+	
 	public static void createSolutionActions() {
 		
 		int totalNumber=0;
