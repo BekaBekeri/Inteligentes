@@ -23,7 +23,7 @@ public class Main {
 			}
 			selection(linkedList);
 			t2 = System.currentTimeMillis();
-			System.out.println("The time to insert " + optionsL[i] + " states in a LinkedList has been: " + (t2 - t1) + ".");
+			System.out.println("The time to insert " + optionsL[i] + " states in a LinkedList has been: " + (t2 - t1) + " ms.");
 		}
 		
 		for(int i = 0; i < optionsS.length; i++){
@@ -35,7 +35,7 @@ public class Main {
 			}
 			
 			t2 = System.currentTimeMillis();
-			System.out.println("The time to instert " + optionsS[i] + " states in a SortedSet has been: " + (t2 - t1) + ".");
+			System.out.println("The time to instert " + optionsS[i] + " states in a SortedSet has been: " + (t2 - t1) + " ms.");
 		}
 		
 		for(int i = 0; i < optionsP.length; i++){
@@ -47,7 +47,7 @@ public class Main {
 			}
 			
 			t2 = System.currentTimeMillis();
-			System.out.println("The time to instert " + optionsP[i] + " states in a PriorityQueue has been: " + (t2 - t1) + ".");
+			System.out.println("The time to instert " + optionsP[i] + " states in a PriorityQueue has been: " + (t2 - t1) + " ms.");
 		}
 	}
 	
