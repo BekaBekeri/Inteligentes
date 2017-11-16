@@ -2,6 +2,7 @@ package Domain;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import Exceptions.wrongDataException;
 
@@ -11,16 +12,24 @@ import Exceptions.wrongDataException;
  *************************************************************************************/
 public class Control {
 
-	private static String[] finalactions;
-	private static Node[] orderedStates;
 	private static PriorityQueue<Node> frontier;
-	private static Node finalNode;
-	private static State initialState;
+	private static LinkedList<State> visited;
+	
 	private static byte mean;
 	private static byte max;
-	private static int maxDepth=-1;
-	private static int currentDepth=0;
+	
+	private static int maxDepth;
 	private static String strategyToUse = null;
+	private static boolean optimization=true;
+	private static int currentDepth=0;
+	
+	private static State initialState;
+	private static int finalCost;
+	private static int finalDepth;
+	private static String[] finalactions;
+	private static Node finalNode;
+	private static long executionTime;
+	private static int n_nodes;
 	
 	/***************************************************************************************************************
 	 * Method name: mainFunctionality
@@ -32,39 +41,48 @@ public class Control {
 	 **************************************************************************************************************/
 	public static boolean mainFunctionality(byte[] infoarray, byte[][]initialField){
 		
+		long startTime;
+		boolean solutionFound=false;
+		
+		visited = new LinkedList<State>();
+		frontier = new PriorityQueue<Node>();
+		
+		initialState = new State(initialField, infoarray[0], infoarray[1]);
+		Node initialNode = new Node(null, initialState, null, 0, 0, strategyToUse, mean);
+		
+		mean = infoarray[2];
+		max = infoarray[3];
+		n_nodes=1;
+		
 		if (strategyToUse.equals("IDS")) {
 			currentDepth=0;
 		}else {
 			currentDepth=maxDepth;
 		}
 		
-		frontier = new PriorityQueue<Node>();
-		
-		initialState = new State(initialField, infoarray[0], infoarray[1]);
-		Node initialNode = new Node(null, initialState, null, 0, 0, strategyToUse);
-		
-		mean = infoarray[2];
-		max = infoarray[3];
-		
-		boolean solutionFound=false;
-		
 		List<Action> actionList = null;
 		System.out.println("Execution started. Please wait while our program looks for a solution.");
+		startTime = System.nanoTime();
 		
 		do {
 			
+			visited.clear();
 			frontier.clear();
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
 				
+				visited.offer(frontier.peek().getState());
 				actionList=generateActions(frontier.peek());
-				successor(actionList, frontier.poll());
+				generateSuccessors(actionList, frontier.poll());
+				n_nodes++;
 			}
 			
 			currentDepth++;
 			
 		}while(currentDepth<=maxDepth && frontier.isEmpty());
+		
+		executionTime = System.nanoTime() - startTime;
 		
 		if(frontier.isEmpty()){
 			System.out.println("No solution found, using strategy: "+strategyToUse+ " , with Maximun Depth: "+maxDepth+".");
@@ -187,7 +205,7 @@ public class Control {
 		
 		State fatherState = fatherNode.getState();
 		State currentState = new State (fatherState.copyField(), fatherState.getTractorX(), fatherState.getTractorY());
-		Node currentNode = new Node(fatherNode, currentState, action, cost, depth, strategyToUse);
+		Node currentNode = new Node(fatherNode, currentState, action, cost, depth, strategyToUse, mean);
 		
 		byte centric = fatherState.getPosition(fatherState.getTractorX(), fatherState.getTractorY());		
 		centric = (byte) (centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW());
@@ -266,6 +284,107 @@ public class Control {
 		return check;
 	}
 	
+	/************************************************************************************************************
+	 * Method name: isGoal
+	 * Method description: This method is used to check if the state is the one that we are looking for
+	 * @param state: the state we want to check
+	 * @return boolean depending 
+	 *************************************************************************************************************/
+	public static boolean isGoal(State state){
+		for(int i = 0; i < state.getField().length; i++){
+			for(int j = 0; j < state.getField()[0].length; j++){
+				if(state.getField()[i][j] != mean){
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	/*************************************************************************************************************
+	 * Method name: successor
+	 * Method description: generate all the successors of a given node and add them to the frontier
+	 * @param actionList: the list of the actions to be applied
+	 * @param currentNode: the node where we apply the actions
+	 *************************************************************************************************************/
+
+	public static void generateSuccessors(List<Action> actionList, Node currentNode){
+		for(int i = 0; i < actionList.size(); i++){
+			if (currentNode.getDepth() < currentDepth) {
+				Node newNode = applyAction(currentNode, actionList.get(i));
+				if (optimization) {
+					if (checkVisited(newNode.getState())) {
+						frontier.add(newNode);
+					}
+				}else {
+					frontier.add(newNode);
+				}
+			}
+		}	
+	}
+
+	
+	/*************************************************************************************************************
+	 * Method name: createSolutionActions
+	 * Method description: Sort the final solution and print it on the screen
+	 *************************************************************************************************************/
+	
+	public static void createSolutionActions() {
+		
+		int totalNumber=0;
+		
+		Node fatherNode = finalNode.getFather();
+		Node currentNode = finalNode;
+		finalCost = finalNode.getCost();
+		finalDepth = finalNode.getDepth();
+		
+		Stack<String> actionStack = new Stack<String>();
+
+		if (finalDepth==0) {
+			System.out.println("Initial state already accomplishes objective.");
+		}else {
+			
+			while(currentNode.getFather()!=null) {
+				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
+				fatherNode=fatherNode.getFather();
+				currentNode=currentNode.getFather();
+			}
+			finalactions = new String[actionStack.size()];
+			totalNumber= actionStack.size();
+			
+			System.out.println("List of actions in order to reach the goal state: ");
+			System.out.println();
+			
+			if (!actionStack.isEmpty()) {
+				for (int i=0; i<totalNumber; i++) {
+					System.out.println(actionStack.peek());
+					finalactions[i]=actionStack.pop();
+				}
+			}
+			System.out.println();
+			System.out.println("*******Execution Statistics*******");
+			System.out.println("Total cost to reach solution: "+finalCost+", Depth of the solution: "+finalDepth+".");
+			System.out.println("Number of visited nodes: "+n_nodes+", Execution Time: "+executionTime+" ns ("+executionTime/1000000000.0+" s).");
+		}
+		
+	}
+	
+	private static boolean checkVisited(State currentState) {
+		int n_elements = visited.size();
+		for (int i=0; i<n_elements; i++) {
+			if (currentState.equals(visited.get(i))) {
+				if (currentState.getValue() < visited.get(i).getValue()) {
+					visited.get(i).setValue(currentState.getValue());
+					return true;
+				}else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	/*******************************************************************************************************
 	 * Method name: read
 	 * Method description: Method encharged of calling the Broker of persistence in order to read a file
@@ -276,8 +395,9 @@ public class Control {
 	 * @throws FileNotFoundException: on problems finding the file
 	 * @throws wrongDataException: on controlled errors
 	 ********************************************************************************************************/
-	public static boolean read(String filename, int depth, String strategy) throws FileNotFoundException, wrongDataException, InputMismatchException {
+	public static boolean read(String filename, int depth, String strategy, boolean optimize) throws FileNotFoundException, wrongDataException, InputMismatchException {
 		boolean resultAchieved;
+		optimization = optimize;
 		byte[] infoarray = new byte[6];
 		byte[][] initialField = Persistence.Broker.readFile(filename, infoarray);
 		maxDepth = depth;
@@ -307,97 +427,7 @@ public class Control {
 		newPosition[0]=finalState.getTractorX();
 		newPosition[1]=finalState.getTractorY();
 		
-		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, orderedStates, strategyToUse);
-	}
-	
-	/************************************************************************************************************
-	 * Method name: isGoal
-	 * Method description: This method is used to check if the state is the one that we are looking for
-	 * @param state: the state we want to check
-	 * @return boolean depending 
-	 *************************************************************************************************************/
-	public static boolean isGoal(State state){
-		boolean aux = true;
-	
-		for(int i = 0; i < state.getField().length; i++){
-			for(int j = 0; j < state.getField()[0].length; j++){
-				if(state.getField()[i][j] != mean){
-					aux = false;
-				}
-			}
-		}
-		
-		return aux;
-	}
-
-	/*************************************************************************************************************
-	 * Method name: successor
-	 * Method description: generate all the successors of a given node and add them to the frontier
-	 * @param actionList: the list of the actions to be applied
-	 * @param currentNode: the node where we apply the actions
-	 *************************************************************************************************************/
-
-	public static void successor(List<Action> actionList, Node currentNode){
-		for(int i = 0; i < actionList.size(); i++){
-			if (currentNode.getDepth() < currentDepth) {
-				//Duplicates
-				frontier.add(applyAction(currentNode, actionList.get(i)));
-			}
-		}	
-	}
-
-	
-	/*************************************************************************************************************
-	 * Method name: createSolutionActions
-	 * Method description: Sort the final solution and print it on the screen
-	 *************************************************************************************************************/
-	
-	public static void createSolutionActions() {
-		
-		int totalNumber=0;
-		
-		Node fatherNode = finalNode.getFather();
-		Node currentNode = finalNode;
-		int finalCost = finalNode.getCost();
-		int finalDepth = finalNode.getDepth();
-		
-		Stack<String> actionStack = new Stack<String>();
-		Stack<Node> nodeStack = new Stack<Node>();
-
-		if (finalDepth==0) {
-			System.out.println("Initial state already accomplishes objective.");
-		}else {
-			
-			while(currentNode.getFather()!=null) {
-				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
-				nodeStack.push(currentNode);
-				fatherNode=fatherNode.getFather();
-				currentNode=currentNode.getFather();
-			}
-			finalactions = new String[actionStack.size()];
-			orderedStates = new Node[nodeStack.size()];
-			totalNumber= actionStack.size();
-			
-			System.out.println("List of actions in order to reach the goal state: ");
-			System.out.println();
-			
-			if (!actionStack.isEmpty()) {
-				for (int i=0; i<totalNumber; i++) {
-					System.out.println(actionStack.peek());
-					for (int j=0; j<nodeStack.peek().getState().getField().length; j++) {
-						for (int k=0; k<nodeStack.peek().getState().getField()[j].length; k++) {
-							System.out.print(nodeStack.peek().getState().getField()[j][k]+" ");
-						}
-						System.out.print("\n");
-					}
-					orderedStates[i]=nodeStack.pop();
-					finalactions[i]=actionStack.pop();
-				}
-			}
-			System.out.println();
-			System.out.println("Total cost to reach solution: "+finalCost+", Depth of the solution: "+finalDepth+".");
-		}
-		
+		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
 	}
 	
 }

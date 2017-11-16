@@ -8,15 +8,16 @@ public class Node implements Comparable<Node> {
 	private int cost;
 	private int value;
 	private int depth;
+	private int heuristic;
 	
-	
-	public Node(Node father, State state, Action appliedAction, int cost, int depth, String strategy) {
+	public Node(Node father, State state, Action appliedAction, int cost, int depth, String strategy, int mean) {
 		this.father = father;
 		this.state = state;
 		this.appliedAction= appliedAction;
 		this.cost=cost;
 		this.depth=depth;
 		setStrategy(strategy);
+		setHeuristic(mean);
 	}
 	
 	public State getState() {
@@ -57,9 +58,29 @@ public class Node implements Comparable<Node> {
 	}
 
 	private void setStrategy(String strategy) {
-		if (strategy.equals("BFS")) value=depth;
-		if (strategy.equals("DFS") || strategy.equals("IDS")) value=-depth;
-		if (strategy.equals("UCS")) value = cost;
+		if (strategy.equals("BFS")) {
+			value = depth;
+			state.setValue(cost);
+		}else if(strategy.equals("DFS") || strategy.equals("IDS")){
+			value = -depth;
+			state.setValue(cost);
+		}else if(strategy.equals("UCS")) {
+			value = cost;
+			state.setValue(value);
+		}else if(strategy.equals("A*")) {
+			value = cost + heuristic;
+			state.setValue(value);
+		}
+	}
+	
+	protected void setHeuristic(int mean) {
+		int heuristic=0;
+		for (byte i=0; i<state.getField().length; i++) {
+			for (byte j=0; j<state.getField()[0].length; j++) {
+				if (state.getPosition(i, j)!=mean) heuristic++;
+			}
+		}
+		this.heuristic = heuristic;
 	}
 	
 }

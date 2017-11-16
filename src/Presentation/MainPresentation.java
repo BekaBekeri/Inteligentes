@@ -7,8 +7,8 @@ import java.util.Scanner;
  * Class Name: MainPresentation
  * Class Description: Class encharged of presenting the main interface to the user
  * @author Beka Bekeri -, Alvaro Guerrero del Pozo, Fernando Vallejo Banegas
- * Release Date: 14-11-2017
- * @version 3.3
+ * Release Date: 16-11-2017
+ * @version 4.0
  *********************************************************************************/
 public class MainPresentation {
 
@@ -16,7 +16,7 @@ public class MainPresentation {
 	
 	/*****************************************************************************************
 	 * Method name: main
-	 * Method description: method encharged of representing the first interface to the user
+	 * Method description: method in charged of representing the first interface to the user
 	 * @param args
 	 ****************************************************************************************/
 	public static void main(String[] args){
@@ -53,14 +53,15 @@ public class MainPresentation {
 		char saveornot = 0;
 		String oldfile, newfile;
 		String strategy = null;
+		boolean optimize;
 		int depth=0;
 		
 		oldfile=ReadWriteFrame.getFileName();
 		depth=readDepth();
 		strategy = readStrategy();
+		optimize=readOptimize();
 		
-		
-		if (ReadWriteFrame.readFile(oldfile, depth, strategy)) {
+		if (ReadWriteFrame.readFile(oldfile, depth, strategy, optimize)) {
 			System.out.println("Do you wish to save the result in a file?(y/n): ");
 			saveornot=read.next().charAt(0);
 			if (Character.toString(saveornot).equalsIgnoreCase("y")) {
@@ -89,12 +90,13 @@ public class MainPresentation {
 		String strategy=null;
 		int option= -1;
 		
-		while (option<1 || option>4) {
+		while (option<1 || option>5) {
 			System.out.println("Choose an strategy. Note that all of them are limited by previous maximun depth introduced: ");
 			System.out.println("1-BFS (Breath-first search).");
 			System.out.println("2-DFS (Depth-first search).");
 			System.out.println("3-IDS (Iterative deepening search).");
 			System.out.println("4-UCS (Uniform cost search).");
+			System.out.println("5-A*");
 			try{
 				option=read.nextInt();
 				read.nextLine();
@@ -114,14 +116,28 @@ public class MainPresentation {
 			case 4:
 				strategy = "UCS";
 				break;
+			case 5:
+				strategy = "A*";
+				break;
 			default:
-				System.out.println("Please introduce 1,2,3 or 4 .\n");
+				System.out.println("Please introduce 1,2,3, 4, or 5.\n");
 				option=-1;
 				read.nextLine();
 			}
 		}
 		
 		return strategy;
+	}
+	
+	private static boolean readOptimize() {
+		char optimize;
+		System.out.println("Do you wish to use the optimized version (Prunning)?(y/n): ");
+		optimize=read.next().charAt(0);
+		if (Character.toString(optimize).equalsIgnoreCase("y")) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 }

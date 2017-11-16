@@ -33,10 +33,10 @@ public class ReadWriteFrame {
 	 * @param filename: name of the file to be parsed
 	 * @return: a boolean, true in correct execution, false in other case
 	 **********************************************************************************************************/
-	protected static boolean readFile(String filename, int depth, String strategy) {
+	protected static boolean readFile(String filename, int depth, String strategy, boolean optimize) {
 		boolean solutionFound = false;
 		try {
-			if(Domain.Control.read(filename, depth, strategy)) {
+			if(Domain.Control.read(filename, depth, strategy, optimize)) {
 				solutionFound=true;
 			}else {
 				solutionFound=false;

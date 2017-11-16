@@ -86,7 +86,7 @@ public class Broker {
 	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, Node[] allNodes, String strategy) throws IOException{
+	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, int cost, int depth, String strategy, int n_nodes, long executionTime) throws IOException{
 		int rows=infoarray[5];
 		int columns = infoarray[4];
 		int lines= rows+1;
@@ -114,17 +114,11 @@ public class Broker {
 			writer.println("****The actions taken to reach the goal state are: ****");
 			for (int i=0; i<actions.length; i++) {
 				writer.println(actions[i]);
-				for (int j=0; j<allNodes[i].getState().getField().length; j++) {
-					for (int k=0; k<allNodes[i].getState().getField()[j].length; k++) {
-						temporalRow += " "+allNodes[i].getState().getField()[j][k]+" ";
-					}
-					temporalRow = temporalRow.replaceAll("null", "");
-					writer.println(temporalRow);
-					temporalRow = null;
-				}
 			}
 			writer.println();
-			writer.println("Depth of the solution: "+allNodes[allNodes.length-1].getDepth()+", with Cost: "+allNodes[allNodes.length-1].getCost());
+			writer.println("********Execution Statistics********");
+			writer.println("Depth of the solution: "+depth+", with Total Cost: "+cost);
+			writer.println("Number of nodes explored: "+n_nodes+", Execution Time: "+executionTime+" ns ("+executionTime/1000000000.0+" s).");
 			writer.println("Solution found with strategy: "+strategy+".");
 		}else {
 			writer.println("Initial state already accomplishes solution.");
