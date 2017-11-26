@@ -8,7 +8,8 @@ public class Action {
 	private byte sandE;
 	
 	
-	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) {
+	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) { //SOLO COMENTO PARA PROBAR
+		
 		super();
 		this.move = newMove;
 		this.sandN = sandN;
