@@ -8,8 +8,7 @@ public class Action {
 	private byte sandE;
 	
 	
-	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) { //SOLO COMENTO PARA PROBAR
-		
+	public Action(Movement newMove, byte sandN, byte sandE, byte sandS, byte sandW) { //Just testing EGit
 		super();
 		this.move = newMove;
 		this.sandN = sandN;
