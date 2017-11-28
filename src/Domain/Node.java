@@ -60,16 +60,12 @@ public class Node implements Comparable<Node> {
 	private void setStrategy(String strategy) {
 		if (strategy.equals("BFS")) {
 			value = depth;
-			state.setValue(cost);
 		}else if(strategy.equals("DFS") || strategy.equals("IDS")){
 			value = -depth;
-			state.setValue(cost);
 		}else if(strategy.equals("UCS")) {
 			value = cost;
-			state.setValue(value);
 		}else if(strategy.equals("A*")) {
 			value = cost + heuristic;
-			state.setValue(value);
 		}
 	}
 	

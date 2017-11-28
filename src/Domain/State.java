@@ -7,15 +7,6 @@ public class State{
 	private byte [][] field;
 	private byte tractorX;
 	private byte tractorY;
-	private int value;
-	
-	public int getValue() {
-		return value;
-	}
-
-	public void setValue(int value) {
-		this.value = value;
-	}
 
 	public State(byte[][] field, byte tractorX, byte tractorY) {
 		this.field = field;
@@ -60,16 +51,15 @@ public class State{
 	}
 
 	public boolean equals(State state) {
-		
+		if (!(tractorX == state.getTractorX() && tractorY == state.getTractorY())) {
+			return false;
+		}
 		for (byte i=0; i<field.length; i++) {
 			for (byte j=0; j<field[i].length; j++) {
 				if (field[i][j]!=state.getPosition(i, j)) {
 					return false;
 				}
 			}
-		}
-		if (!(tractorX == state.getTractorX() && tractorY == state.getTractorY())) {
-			return false;
 		}
 		return true;
 		

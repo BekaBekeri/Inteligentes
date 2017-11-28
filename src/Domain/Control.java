@@ -14,6 +14,7 @@ public class Control {
 
 	private static PriorityQueue<Node> frontier;
 	private static LinkedList<State> visited;
+	private static LinkedList<Integer> visitedValues;
 	
 	private static byte mean;
 	private static byte max;
@@ -45,6 +46,7 @@ public class Control {
 		boolean solutionFound=false;
 		
 		visited = new LinkedList<State>();
+		visitedValues = new LinkedList<Integer>();
 		frontier = new PriorityQueue<Node>();
 		
 		initialState = new State(initialField, infoarray[0], infoarray[1]);
@@ -67,12 +69,18 @@ public class Control {
 		do {
 			
 			visited.clear();
+			visitedValues.clear();
 			frontier.clear();
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
 				
-				visited.offer(frontier.peek().getState());
+				visited.add(frontier.peek().getState());
+				if(strategyToUse.equals("A*")) {
+					visitedValues.add(frontier.peek().getValue());
+				}else{
+					visitedValues.add(frontier.peek().getCost());
+				}				
 				actionList=generateActions(frontier.peek());
 				generateSuccessors(actionList, frontier.poll());
 				n_nodes++;
@@ -314,7 +322,7 @@ public class Control {
 			if (currentNode.getDepth() < currentDepth) {
 				Node newNode = applyAction(currentNode, actionList.get(i));
 				if (optimization) {
-					if (checkVisited(newNode.getState())) {
+					if (checkVisited(newNode)) {
 						frontier.add(newNode);
 					}
 				}else {
@@ -370,12 +378,12 @@ public class Control {
 		
 	}
 	
-	private static boolean checkVisited(State currentState) {
+	private static boolean checkVisited(Node currentNode) {
 		int n_elements = visited.size();
 		for (int i=0; i<n_elements; i++) {
-			if (currentState.equals(visited.get(i))) {
-				if (currentState.getValue() < visited.get(i).getValue()) {
-					visited.get(i).setValue(currentState.getValue());
+			if (currentNode.getState().equals(visited.get(i))) {
+				if (currentNode.getValue() < visitedValues.get(i)) {
+					visitedValues.set(i, currentNode.getValue());
 					return true;
 				}else {
 					return false;
