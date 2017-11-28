@@ -13,9 +13,9 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static PriorityQueue<Node> frontier;
-	private static LinkedList<State> visited;
-	private static LinkedList<Integer> visitedValues;
-	
+	//private static LinkedList<State> visited;
+	//private static LinkedList<Integer> visitedValues;
+	private static HashTable(Long, Integer) visitedTable;
 	private static byte mean;
 	private static byte max;
 	
@@ -45,9 +45,11 @@ public class Control {
 		long startTime;
 		boolean solutionFound=false;
 		
-		visited = new LinkedList<State>();
-		visitedValues = new LinkedList<Integer>();
+		//visited = new LinkedList<State>();
+		//visitedValues = new LinkedList<Integer>();
 		frontier = new PriorityQueue<Node>();
+		visitedTable = new HashTable(Long, Integer);
+			
 		
 		initialState = new State(initialField, infoarray[0], infoarray[1]);
 		Node initialNode = new Node(null, initialState, null, 0, 0, strategyToUse, mean);
@@ -68,18 +70,19 @@ public class Control {
 		
 		do {
 			
-			visited.clear();
-			visitedValues.clear();
+			visitedTable.clear();
+			//visitedValues.clear();
 			frontier.clear();
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
 				
-				visited.add(frontier.peek().getState());
+				//visited.add(frontier.peek().getState());
+				
 				if(strategyToUse.equals("A*")) {
-					visitedValues.add(frontier.peek().getValue());
+					visitedTable.add(md5(frontier.peek().getState()) ,frontier.peek().getValue());
 				}else{
-					visitedValues.add(frontier.peek().getCost());
+					visitedTable.add(md5(frontier.peek().getState()) ,frontier.peek().getCost());
 				}				
 				actionList=generateActions(frontier.peek());
 				generateSuccessors(actionList, frontier.poll());
@@ -316,7 +319,6 @@ public class Control {
 	 * @param actionList: the list of the actions to be applied
 	 * @param currentNode: the node where we apply the actions
 	 *************************************************************************************************************/
-
 	public static void generateSuccessors(List<Action> actionList, Node currentNode){
 		for(int i = 0; i < actionList.size(); i++){
 			if (currentNode.getDepth() < currentDepth) {
@@ -332,12 +334,10 @@ public class Control {
 		}	
 	}
 
-	
 	/*************************************************************************************************************
 	 * Method name: createSolutionActions
 	 * Method description: Sort the final solution and print it on the screen
 	 *************************************************************************************************************/
-	
 	public static void createSolutionActions() {
 		
 		int totalNumber=0;
@@ -378,9 +378,9 @@ public class Control {
 		
 	}
 	
-	private static boolean checkVisited(Node currentNode) {
+	private static boolean checkVisited(Node currentNode) {							//CAMBIOS AQUI
 		int n_elements = visited.size();
-		for (int i=0; i<n_elements; i++) {
+		/*for (int i=0; i<n_elements; i++) {
 			if (currentNode.getState().equals(visited.get(i))) {
 				if (currentNode.getValue() < visitedValues.get(i)) {
 					visitedValues.set(i, currentNode.getValue());
@@ -389,6 +389,15 @@ public class Control {
 					return false;
 				}
 			}
+		}*/
+		int auxValue = visiteTable.get(md5(currentNode.getState()));
+		if(auxValue != NULL){
+			if(currentNode.getValue < auxValue){
+				visitedTable.put(md5(currentNode.getState()), currentNode.getValue())
+			}
+			return true;
+		}else{
+			return false;
 		}
 		return true;
 	}
@@ -415,12 +424,12 @@ public class Control {
 	}
 	
 	/********************************************************************************************************
-	 * Method name:write
-	 * Method description: method encharged of calling the Broker of persistence, in order to write to a file
-	 * @param filename: the name of the file that information is going to be writen to
-	 * @throws IOException: on unknown error while trying to write
-	 ********************************************************************************************************/
-	 public static void write(String filename) throws IOException {
+	* Method name:write
+	* Method description: method encharged of calling the Broker of persistence, in order to write to a file
+	* @param filename: the name of the file that information is going to be writen to
+	* @throws IOException: on unknown error while trying to write
+	********************************************************************************************************/
+	public static void write(String filename) throws IOException {
 		byte[] infoarray = new byte[6];
 		byte[] newPosition = new byte[2];
 		State finalState = finalNode.getState();
@@ -436,6 +445,35 @@ public class Control {
 		newPosition[1]=finalState.getTractorY();
 		
 		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
+	}
+	 
+	 
+	public static long md5(State state){
+		byte[][] field = state.copyField();
+		String aux =  Integer.toString(field[0][0]) + Integer.toString(field[0][1]) + Integer.toString(field[0][2]) +
+					  Integer.toString(field[1][0]) + Integer.toString(field[1][1]) + Integer.toString(field[1][2]) + 
+					  Integer.toString(field[2][0]) + Integer.toString(field[2][1]) + Integer.toString(field[2][2]) + 
+					  Integer.toString(state.getTractorX()) + Integer.toString(state.getTractorY()); 
+		return strToLong(aux);
+	}
+		
+	public static long strToLong( String str ){
+		int i = 0;
+	    long num = 0;
+	    boolean isNeg = false;
+
+	    if (str.charAt(0) == '-') {
+	        isNeg = true;
+	        i = 1;
+	    }
+
+	    while( i < str.length()) {
+	        num *= 10;
+	        num += str.charAt(i++) - '0';
+	    }
+	    if (isNeg)
+	        num = -num;
+	    return num;
 	}
 	
 }
