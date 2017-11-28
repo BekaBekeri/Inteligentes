@@ -15,7 +15,7 @@ public class Control {
 	private static PriorityQueue<Node> frontier;
 	//private static LinkedList<State> visited;
 	//private static LinkedList<Integer> visitedValues;
-	private static HashTable(Long, Integer) visitedTable;
+	private static Hashtable<Long, Integer> visitedTable;
 	private static byte mean;
 	private static byte max;
 	
@@ -48,7 +48,7 @@ public class Control {
 		//visited = new LinkedList<State>();
 		//visitedValues = new LinkedList<Integer>();
 		frontier = new PriorityQueue<Node>();
-		visitedTable = new HashTable(Long, Integer);
+		visitedTable = new Hashtable<Long, Integer>();
 			
 		
 		initialState = new State(initialField, infoarray[0], infoarray[1]);
@@ -80,9 +80,9 @@ public class Control {
 				//visited.add(frontier.peek().getState());
 				
 				if(strategyToUse.equals("A*")) {
-					visitedTable.add(md5(frontier.peek().getState()) ,frontier.peek().getValue());
+					visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getValue());
 				}else{
-					visitedTable.add(md5(frontier.peek().getState()) ,frontier.peek().getCost());
+					visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getCost());
 				}				
 				actionList=generateActions(frontier.peek());
 				generateSuccessors(actionList, frontier.poll());
@@ -379,8 +379,8 @@ public class Control {
 	}
 	
 	private static boolean checkVisited(Node currentNode) {							//CAMBIOS AQUI
-		int n_elements = visited.size();
-		/*for (int i=0; i<n_elements; i++) {
+		/*int n_elements = visited.size();
+		for (int i=0; i<n_elements; i++) {
 			if (currentNode.getState().equals(visited.get(i))) {
 				if (currentNode.getValue() < visitedValues.get(i)) {
 					visitedValues.set(i, currentNode.getValue());
@@ -390,16 +390,15 @@ public class Control {
 				}
 			}
 		}*/
-		int auxValue = visiteTable.get(md5(currentNode.getState()));
-		if(auxValue != NULL){
-			if(currentNode.getValue < auxValue){
-				visitedTable.put(md5(currentNode.getState()), currentNode.getValue())
+		
+		if(visitedTable.get(md5(currentNode.getState())) !=  null){
+			if(currentNode.getValue() < visitedTable.get(md5(currentNode.getState()))){
+				visitedTable.put(md5(currentNode.getState()), currentNode.getValue());
 			}
 			return true;
 		}else{
 			return false;
 		}
-		return true;
 	}
 	
 	/*******************************************************************************************************
