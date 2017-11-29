@@ -25,7 +25,8 @@ public class Control {
 	private static State initialState;
 	private static int finalCost;
 	private static int finalDepth;
-	private static String[] finalactions;
+	private static String[] actionsToGoal;
+	private static State[] statesToGoal;
 	private static Node finalNode;
 	private static long executionTime;
 	private static int n_nodes;
@@ -71,14 +72,13 @@ public class Control {
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
-				if(strategyToUse.equals("A*")) {
-					visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getValue());
-				}else{
-					visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getCost());
-				}				
+				
+				visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getCost());
+					
 				actionList=generateActions(frontier.peek());
 				generateSuccessors(actionList, frontier.poll());
 				n_nodes++;
+				
 			}
 			
 			currentDepth++;
@@ -92,7 +92,7 @@ public class Control {
 			System.out.println();
 		}else{
 			if (isGoal(frontier.peek().getState())){
-				System.out.println("Solution found");
+				System.out.println("Solution found.");
 				System.out.println();
 				finalNode = frontier.poll();
 				createSolutionActions();
@@ -291,7 +291,7 @@ public class Control {
 	 * Method name: isGoal
 	 * Method description: This method is used to check if the state is the one that we are looking for
 	 * @param state: the state we want to check
-	 * @return boolean depending 
+	 * @return boolean 
 	 *************************************************************************************************************/
 	public static boolean isGoal(State state){
 		for(int i = 0; i < state.getField().length; i++){
@@ -312,6 +312,7 @@ public class Control {
 	 * @param currentNode: the node where we apply the actions
 	 *************************************************************************************************************/
 	public static void generateSuccessors(List<Action> actionList, Node currentNode){
+		
 		for(int i = 0; i < actionList.size(); i++){
 			if (currentNode.getDepth() < currentDepth) {
 				Node newNode = applyAction(currentNode, actionList.get(i));
@@ -340,26 +341,38 @@ public class Control {
 		finalDepth = finalNode.getDepth();
 		
 		Stack<String> actionStack = new Stack<String>();
-
+		Stack<State> stateStack = new Stack<State>();
+		
 		if (finalDepth==0) {
 			System.out.println("Initial state already accomplishes objective.");
 		}else {
 			
 			while(currentNode.getFather()!=null) {
 				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
+				stateStack.push(currentNode.getState());
 				fatherNode=fatherNode.getFather();
 				currentNode=currentNode.getFather();
 			}
-			finalactions = new String[actionStack.size()];
+			actionsToGoal = new String[actionStack.size()];
+			statesToGoal = new State[stateStack.size()];
 			totalNumber= actionStack.size();
 			
-			System.out.println("List of actions in order to reach the goal state: ");
+			System.out.println("List of actions and states in order to reach the goal state: ");
 			System.out.println();
 			
 			if (!actionStack.isEmpty()) {
 				for (int i=0; i<totalNumber; i++) {
 					System.out.println(actionStack.peek());
-					finalactions[i]=actionStack.pop();
+					
+					for (byte j=0; j<initialState.getField().length; j++) {
+						for (byte h=0; h<initialState.getField()[j].length; h++) {
+							System.out.print(stateStack.peek().getPosition(j, h)+ " ");
+						}
+						System.out.println();
+					}
+					
+					actionsToGoal[i]=actionStack.pop();
+					statesToGoal[i] = stateStack.pop();
 				}
 			}
 			System.out.println();
@@ -377,18 +390,20 @@ public class Control {
 	 *************************************************************************************************************/
 	private static boolean checkVisited(Node currentNode) {						
 		if(visitedTable.get(md5(currentNode.getState())) !=  null){
-			if(currentNode.getValue() < visitedTable.get(md5(currentNode.getState()))){
-				visitedTable.put(md5(currentNode.getState()), currentNode.getValue());
+			if(currentNode.getCost() < visitedTable.get(md5(currentNode.getState()))){
+				visitedTable.put(md5(currentNode.getState()), currentNode.getCost());
+				return true;
+			}else {
+				return false;
 			}
-			return true;
 		}else{
-			return false;
+			return true;
 		}
 	}
 	
 	/*******************************************************************************************************
 	 * Method name: read
-	 * Method description: Method encharged of calling the Broker of persistence in order to read a file
+	 * Method description: Method in charged of of calling the Broker of persistence in order to read a file
 	 * @param filename: name of the file to be read
 	 * @param depth: the maximum depth
 	 * @param strategy: the name of the strategy to be applied 
@@ -428,7 +443,7 @@ public class Control {
 		newPosition[0]=finalState.getTractorX();
 		newPosition[1]=finalState.getTractorY();
 		
-		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
+		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, actionsToGoal, statesToGoal, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
 	}
 	 
 	 /*************************************************************************************************************
@@ -438,35 +453,15 @@ public class Control {
 	 *************************************************************************************************************/
 	public static long md5(State state){
 		byte[][] field = state.copyField();
-		String aux =  Integer.toString(field[0][0]) + Integer.toString(field[0][1]) + Integer.toString(field[0][2]) +
-					  Integer.toString(field[1][0]) + Integer.toString(field[1][1]) + Integer.toString(field[1][2]) + 
-					  Integer.toString(field[2][0]) + Integer.toString(field[2][1]) + Integer.toString(field[2][2]) + 
-					  Integer.toString(state.getTractorX()) + Integer.toString(state.getTractorY()); 
-		return strToLong(aux);
-	}
-	
-	
-	/*************************************************************************************************************
-	* Method name: strToLong
-	* Method description: algorith to cast from a numerical String to a Long data type.
-	*************************************************************************************************************/
-	public static long strToLong( String str ){
-		int i = 0;
-	    long num = 0;
-	    boolean isNeg = false;
-
-	    if (str.charAt(0) == '-') {
-	        isNeg = true;
-	        i = 1;
-	    }
-
-	    while( i < str.length()) {
-	        num *= 10;
-	        num += str.charAt(i++) - '0';
-	    }
-	    if (isNeg)
-	        num = -num;
-	    return num;
+		String aux="";
+		for (byte i=0; i<field.length; i++) {
+			for (byte j=0; j<field[0].length; j++) {
+				aux += state.getPosition(i, j);
+			}
+		}
+		aux += state.getTractorX();
+		aux += state.getTractorY();
+		return Long.parseLong(aux);
 	}
 	
 }

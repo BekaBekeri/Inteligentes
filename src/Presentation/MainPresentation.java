@@ -7,8 +7,8 @@ import java.util.Scanner;
  * Class Name: MainPresentation
  * Class Description: Class encharged of presenting the main interface to the user
  * @author Beka Bekeri -, Alvaro Guerrero del Pozo, Fernando Vallejo Banegas
- * Release Date: 16-11-2017
- * @version 4.0
+ * Release Date: 29-11-2017
+ * @version 4.3
  *********************************************************************************/
 public class MainPresentation {
 

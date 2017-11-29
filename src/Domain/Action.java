@@ -58,11 +58,11 @@ public class Action {
 	public String toString(State state){
 		String aux = "";
 		int totalCost = sandN + sandS + sandE + sandW +1;
-		aux = "(" + move.getNewX() + ", " + move.getNewY() + "), [(" + sandN + ", (" + 
+		aux = "((" + move.getNewX() + ", " + move.getNewY() + "), [(" + sandN + ", (" + 
 			  (state.getTractorX()-1) + ", " + state.getTractorY() + ")), ("+ sandE + ", (" + 
 			  state.getTractorX() + ", " + (state.getTractorY()+1) + ")), ("+ sandS + ", (" + 
 			  (state.getTractorX()+1) + ", " + state.getTractorY() + ")), (" + sandW + ", (" + 
-			  state.getTractorX() + ", " + (state.getTractorY()-1) + "))], cost: "+totalCost;
+			  state.getTractorX() + ", " + (state.getTractorY()-1) + "))] " + totalCost+")";
 
 		return aux;
 	}
