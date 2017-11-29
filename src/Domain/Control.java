@@ -13,8 +13,6 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static PriorityQueue<Node> frontier;
-	//private static LinkedList<State> visited;
-	//private static LinkedList<Integer> visitedValues;
 	private static Hashtable<Long, Integer> visitedTable;
 	private static byte mean;
 	private static byte max;
@@ -45,8 +43,6 @@ public class Control {
 		long startTime;
 		boolean solutionFound=false;
 		
-		//visited = new LinkedList<State>();
-		//visitedValues = new LinkedList<Integer>();
 		frontier = new PriorityQueue<Node>();
 		visitedTable = new Hashtable<Long, Integer>();
 			
@@ -71,14 +67,10 @@ public class Control {
 		do {
 			
 			visitedTable.clear();
-			//visitedValues.clear();
 			frontier.clear();
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
-				
-				//visited.add(frontier.peek().getState());
-				
 				if(strategyToUse.equals("A*")) {
 					visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getValue());
 				}else{
@@ -378,19 +370,12 @@ public class Control {
 		
 	}
 	
-	private static boolean checkVisited(Node currentNode) {							//CAMBIOS AQUI
-		/*int n_elements = visited.size();
-		for (int i=0; i<n_elements; i++) {
-			if (currentNode.getState().equals(visited.get(i))) {
-				if (currentNode.getValue() < visitedValues.get(i)) {
-					visitedValues.set(i, currentNode.getValue());
-					return true;
-				}else {
-					return false;
-				}
-			}
-		}*/
-		
+	/*************************************************************************************************************
+	 * Method name: checkVisited
+	 * Method description: Checks if that state is already in the visited states table and if it has been visited
+	 * checks if the value associated is bigger, in that case, overwrites the existing value by the new one
+	 *************************************************************************************************************/
+	private static boolean checkVisited(Node currentNode) {						
 		if(visitedTable.get(md5(currentNode.getState())) !=  null){
 			if(currentNode.getValue() < visitedTable.get(md5(currentNode.getState()))){
 				visitedTable.put(md5(currentNode.getState()), currentNode.getValue());
@@ -446,7 +431,11 @@ public class Control {
 		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, finalactions, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
 	}
 	 
-	 
+	 /*************************************************************************************************************
+	 * Method name: md5
+	 * Method description: This method is made to create a numerical representation of a state that can be used 
+	 * as an index in the hash table.
+	 *************************************************************************************************************/
 	public static long md5(State state){
 		byte[][] field = state.copyField();
 		String aux =  Integer.toString(field[0][0]) + Integer.toString(field[0][1]) + Integer.toString(field[0][2]) +
@@ -455,7 +444,12 @@ public class Control {
 					  Integer.toString(state.getTractorX()) + Integer.toString(state.getTractorY()); 
 		return strToLong(aux);
 	}
-		
+	
+	
+	/*************************************************************************************************************
+	* Method name: strToLong
+	* Method description: algorith to cast from a numerical String to a Long data type.
+	*************************************************************************************************************/
 	public static long strToLong( String str ){
 		int i = 0;
 	    long num = 0;
