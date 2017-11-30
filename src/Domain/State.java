@@ -2,7 +2,7 @@ package Domain;
 
 import java.util.Arrays;
 
-public class State{
+public class State extends Object{
 	
 	private byte [][] field;
 	private byte tractorX;
@@ -51,26 +51,15 @@ public class State{
 	}
 
 	public boolean equals(State state) {
+		
 		if (!(tractorX == state.getTractorX() && tractorY == state.getTractorY())) {
 			return false;
-		}
-		for (byte i=0; i<field.length; i++) {
-			for (byte j=0; j<field[i].length; j++) {
-				if (field[i][j]!=state.getPosition(i, j)) {
-					return false;
-				}
-			}
-		}
-		return true;
-		
-		/*if (!Arrays.deepEquals(field, state.getField())) {
-			return false;
 		}else {
-			if (!(tractorX == state.getTractorX() && tractorY == state.getTractorY())) {
+			if (!Arrays.deepEquals(field, state.getField())) {
 				return false;
 			}
+			return true;
 		}
-		return true;*/
 	}
 	
 }

@@ -2,7 +2,6 @@ package Domain;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import Exceptions.wrongDataException;
 
@@ -13,7 +12,7 @@ import Exceptions.wrongDataException;
 public class Control {
 
 	private static PriorityQueue<Node> frontier;
-	private static Hashtable<Long, Integer> visitedTable;
+	private static Hashtable<String, Integer> visitedTable;
 	private static byte mean;
 	private static byte max;
 	
@@ -45,7 +44,7 @@ public class Control {
 		boolean solutionFound=false;
 		
 		frontier = new PriorityQueue<Node>();
-		visitedTable = new Hashtable<Long, Integer>();
+		visitedTable = new Hashtable<String, Integer>();
 			
 		
 		initialState = new State(initialField, infoarray[0], infoarray[1]);
@@ -451,7 +450,7 @@ public class Control {
 	 * Method description: This method is made to create a numerical representation of a state that can be used 
 	 * as an index in the hash table.
 	 *************************************************************************************************************/
-	public static long md5(State state){
+	public static String md5(State state){
 		byte[][] field = state.copyField();
 		String aux="";
 		for (byte i=0; i<field.length; i++) {
@@ -461,7 +460,7 @@ public class Control {
 		}
 		aux += state.getTractorX();
 		aux += state.getTractorY();
-		return Long.parseLong(aux);
+		return aux;
 	}
 	
 }

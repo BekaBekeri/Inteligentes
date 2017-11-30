@@ -1,7 +1,6 @@
 package Persistence;
 import java.util.*;
 
-import Domain.Node;
 import Domain.State;
 import Exceptions.*;
 
@@ -88,8 +87,8 @@ public class Broker {
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
 	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, State[] states, int cost, int depth, String strategy, int n_nodes, long executionTime) throws IOException{
-		int rows=infoarray[5];
-		int columns = infoarray[4];
+		int columns=infoarray[5];
+		int rows = infoarray[4];
 		int lines= rows+1;
 		String data[] = new String[lines];
 		String temporalRow= "";

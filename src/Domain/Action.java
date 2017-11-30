@@ -62,7 +62,7 @@ public class Action {
 			  (state.getTractorX()-1) + ", " + state.getTractorY() + ")), ("+ sandE + ", (" + 
 			  state.getTractorX() + ", " + (state.getTractorY()+1) + ")), ("+ sandS + ", (" + 
 			  (state.getTractorX()+1) + ", " + state.getTractorY() + ")), (" + sandW + ", (" + 
-			  state.getTractorX() + ", " + (state.getTractorY()-1) + "))] " + totalCost+")";
+			  state.getTractorX() + ", " + (state.getTractorY()-1) + "))], " + totalCost+")";
 
 		return aux;
 	}
