@@ -6,29 +6,37 @@ public class Node implements Comparable<Node> {
 	private State state=null;
 	private Action appliedAction = null;
 	private int cost;
-	private int value;
+	private double value;
 	private int depth;
-	private int heuristic;
+	private double heuristic;
 	
-	public Node(Node father, State state, Action appliedAction, int cost, int depth, String strategy, int mean) {
+	public Node(Node father, State state, Action appliedAction, int cost, int depth) {
 		this.father = father;
 		this.state = state;
 		this.appliedAction= appliedAction;
 		this.cost=cost;
 		this.depth=depth;
-		setStrategy(strategy);
+		
+	}
+	
+	public void updateValues(int mean, String strategy) {
 		setHeuristic(mean);
+		setStrategy(strategy);
 	}
 	
 	public State getState() {
 		return state;
 	}
 	
+	public double getHeuristic() {
+		return heuristic;
+	}
+	
 	public int getDepth() {
 		return depth;
 	}
 
-	public int getValue() {
+	public double getValue() {
 		return value;
 	}
 
@@ -66,6 +74,8 @@ public class Node implements Comparable<Node> {
 			value = cost;
 		}else if(strategy.equals("A*")) {
 			value = cost + heuristic;
+		}else if(strategy.equals("Variant A*")) {
+			value = heuristic * 0.7 + cost * 0.3;
 		}
 	}
 	

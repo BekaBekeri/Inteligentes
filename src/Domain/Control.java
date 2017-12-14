@@ -46,10 +46,6 @@ public class Control {
 		frontier = new PriorityQueue<Node>();
 		visitedTable = new Hashtable<String, Integer>();
 			
-		
-		initialState = new State(initialField, infoarray[0], infoarray[1]);
-		Node initialNode = new Node(null, initialState, null, 0, 0, strategyToUse, mean);
-		
 		mean = infoarray[2];
 		max = infoarray[3];
 		n_nodes=1;
@@ -59,6 +55,10 @@ public class Control {
 		}else {
 			currentDepth=maxDepth;
 		}
+		
+		initialState = new State(initialField, infoarray[0], infoarray[1]);
+		Node initialNode = new Node(null, initialState, null, 0, 0);
+		initialNode.updateValues(mean, strategyToUse);
 		
 		List<Action> actionList = null;
 		System.out.println("Execution started. Please wait while our program looks for a solution.");
@@ -71,9 +71,9 @@ public class Control {
 			frontier.add(initialNode);
 			
 			while(!frontier.isEmpty() && !isGoal(frontier.peek().getState())){
-				
+
 				visitedTable.put(md5(frontier.peek().getState()) ,frontier.peek().getCost());
-					
+
 				actionList=generateActions(frontier.peek());
 				generateSuccessors(actionList, frontier.poll());
 				n_nodes++;
@@ -160,6 +160,15 @@ public class Control {
 			}
 	    }
 	    
+	    //Exam December 1
+	    if (currentNode.getState().getTractorX() == 0 && currentNode.getState().getTractorY()==1) {
+	    	System.out.println();
+	    	System.out.println("Possible actions at position 0,1:");
+	    	for (int i=0; i< actionList.size(); i++) {
+	    		System.out.println(actionList.get(i).toString(currentNode.getState()));
+	    	}
+	    }
+	    
 		return actionList;
 	}
 	
@@ -207,7 +216,7 @@ public class Control {
 		
 		State fatherState = fatherNode.getState();
 		State currentState = new State (fatherState.copyField(), fatherState.getTractorX(), fatherState.getTractorY());
-		Node currentNode = new Node(fatherNode, currentState, action, cost, depth, strategyToUse, mean);
+		Node currentNode = new Node(fatherNode, currentState, action, cost, depth);
 		
 		byte centric = fatherState.getPosition(fatherState.getTractorX(), fatherState.getTractorY());		
 		centric = (byte) (centric - action.getSandN() - action.getSandE() - action.getSandS() - action.getSandW());
@@ -248,7 +257,7 @@ public class Control {
 		
 		currentState.setTractorX(action.getNewMove().getNewX());
 		currentState.setTractorY(action.getNewMove().getNewY());
-		
+		currentNode.updateValues(mean, strategyToUse);
 		return currentNode;
 	}
 	
@@ -342,6 +351,11 @@ public class Control {
 		Stack<String> actionStack = new Stack<String>();
 		Stack<State> stateStack = new Stack<State>();
 		
+		//Exam December 1
+		Stack<Integer> costStack = new Stack<Integer>();
+		Stack<Double> valueStack = new Stack<Double>();
+		Stack<Double> heuristicStack = new Stack<Double>();
+		
 		if (finalDepth==0) {
 			System.out.println("Initial state already accomplishes objective.");
 		}else {
@@ -349,6 +363,12 @@ public class Control {
 			while(currentNode.getFather()!=null) {
 				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
 				stateStack.push(currentNode.getState());
+				
+				//Exam December 1
+				valueStack.push(currentNode.getValue());
+				heuristicStack.push(currentNode.getHeuristic());
+				costStack.push(currentNode.getCost());
+				
 				fatherNode=fatherNode.getFather();
 				currentNode=currentNode.getFather();
 			}
@@ -356,11 +376,15 @@ public class Control {
 			statesToGoal = new State[stateStack.size()];
 			totalNumber= actionStack.size();
 			
+			System.out.println("**************************************************************");
 			System.out.println("List of actions and states in order to reach the goal state: ");
 			System.out.println();
 			
 			if (!actionStack.isEmpty()) {
 				for (int i=0; i<totalNumber; i++) {
+					
+					
+					
 					System.out.println(actionStack.peek());
 					
 					for (byte j=0; j<initialState.getField().length; j++) {
@@ -369,6 +393,17 @@ public class Control {
 						}
 						System.out.println();
 					}
+					
+					//Exam December 1
+					System.out.println("Value of the node: "+valueStack.peek());
+					System.out.println("Heuristic of the node: "+heuristicStack.peek());
+					System.out.println("Cost of the node: "+costStack.peek());
+					System.out.println();
+					
+					//Exam December 1
+					valueStack.pop();
+					heuristicStack.pop();
+					costStack.pop();
 					
 					actionsToGoal[i]=actionStack.pop();
 					statesToGoal[i] = stateStack.pop();

@@ -8,7 +8,7 @@ import java.util.Scanner;
  * Class Description: Class encharged of presenting the main interface to the user
  * @author Beka Bekeri -, Alvaro Guerrero del Pozo, Fernando Vallejo Banegas
  * Release Date: 29-11-2017
- * @version 4.3.1
+ * @version 5.1
  *********************************************************************************/
 public class MainPresentation {
 
@@ -90,13 +90,14 @@ public class MainPresentation {
 		String strategy=null;
 		int option= -1;
 		
-		while (option<1 || option>5) {
+		while (option<1 || option>6) {
 			System.out.println("Choose an strategy. Note that all of them are limited by previous maximun depth introduced: ");
 			System.out.println("1-BFS (Breath-first search).");
 			System.out.println("2-DFS (Depth-first search).");
 			System.out.println("3-IDS (Iterative deepening search).");
 			System.out.println("4-UCS (Uniform cost search).");
 			System.out.println("5-A*");
+			System.out.println("6-Variant A*");
 			try{
 				option=read.nextInt();
 				read.nextLine();
@@ -119,8 +120,11 @@ public class MainPresentation {
 			case 5:
 				strategy = "A*";
 				break;
+			case 6:
+				strategy = "Variant A*";
+				break;
 			default:
-				System.out.println("Please introduce 1,2,3, 4, or 5.\n");
+				System.out.println("Please introduce 1,2,3, 4, 5 or 6.\n");
 				option=-1;
 				read.nextLine();
 			}
