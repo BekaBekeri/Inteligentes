@@ -22,11 +22,9 @@ public class Control {
 	private static int currentDepth=0;
 	
 	private static State initialState;
-	private static int finalCost;
-	private static int finalDepth;
-	private static String[] actionsToGoal;
-	private static State[] statesToGoal;
 	private static Node finalNode;
+	private static String[] actionsToGoal;
+	private static Node[] nodesToGoal;
 	private static long executionTime;
 	private static int n_nodes;
 	
@@ -257,7 +255,9 @@ public class Control {
 		
 		currentState.setTractorX(action.getNewMove().getNewX());
 		currentState.setTractorY(action.getNewMove().getNewY());
+		
 		currentNode.updateValues(mean, strategyToUse);
+		
 		return currentNode;
 	}
 	
@@ -345,35 +345,23 @@ public class Control {
 		
 		Node fatherNode = finalNode.getFather();
 		Node currentNode = finalNode;
-		finalCost = finalNode.getCost();
-		finalDepth = finalNode.getDepth();
 		
 		Stack<String> actionStack = new Stack<String>();
-		Stack<State> stateStack = new Stack<State>();
+		Stack<Node> nodeStack = new Stack<Node>();
 		
-		//Exam December 1
-		Stack<Integer> costStack = new Stack<Integer>();
-		Stack<Double> valueStack = new Stack<Double>();
-		Stack<Double> heuristicStack = new Stack<Double>();
-		
-		if (finalDepth==0) {
+		if (currentNode.getDepth()==0) {
 			System.out.println("Initial state already accomplishes objective.");
 		}else {
 			
 			while(currentNode.getFather()!=null) {
 				actionStack.push(currentNode.getAppliedAction().toString(fatherNode.getState()));
-				stateStack.push(currentNode.getState());
-				
-				//Exam December 1
-				valueStack.push(currentNode.getValue());
-				heuristicStack.push(currentNode.getHeuristic());
-				costStack.push(currentNode.getCost());
+				nodeStack.push(currentNode);
 				
 				fatherNode=fatherNode.getFather();
 				currentNode=currentNode.getFather();
 			}
 			actionsToGoal = new String[actionStack.size()];
-			statesToGoal = new State[stateStack.size()];
+			nodesToGoal = new Node[nodeStack.size()];
 			totalNumber= actionStack.size();
 			
 			System.out.println("**************************************************************");
@@ -389,29 +377,17 @@ public class Control {
 					
 					for (byte j=0; j<initialState.getField().length; j++) {
 						for (byte h=0; h<initialState.getField()[j].length; h++) {
-							System.out.print(stateStack.peek().getPosition(j, h)+ " ");
+							System.out.print(nodeStack.peek().getState().getPosition(j, h)+ " ");
 						}
 						System.out.println();
 					}
-					
-					//Exam December 1
-					System.out.println("Value of the node: "+valueStack.peek());
-					System.out.println("Heuristic of the node: "+heuristicStack.peek());
-					System.out.println("Cost of the node: "+costStack.peek());
-					System.out.println();
-					
-					//Exam December 1
-					valueStack.pop();
-					heuristicStack.pop();
-					costStack.pop();
-					
+					System.out.println("Value: "+nodeStack.peek().getValue()+", Cost: "+nodeStack.peek().getCost()+", Depth: "+nodeStack.peek().getDepth()+".\n");
 					actionsToGoal[i]=actionStack.pop();
-					statesToGoal[i] = stateStack.pop();
+					nodesToGoal[i] = nodeStack.pop();
 				}
 			}
-			System.out.println();
 			System.out.println("*******Execution Statistics*******");
-			System.out.println("Total cost to reach solution: "+finalCost+", Depth of the solution: "+finalDepth+".");
+			System.out.println("Total cost to reach solution: "+finalNode.getCost()+", Depth of the solution: "+finalNode.getDepth()+".");
 			System.out.println("Number of visited nodes: "+n_nodes+", Execution Time: "+executionTime+" ns ("+executionTime/1000000000.0+" s).");
 		}
 		
@@ -477,7 +453,7 @@ public class Control {
 		newPosition[0]=finalState.getTractorX();
 		newPosition[1]=finalState.getTractorY();
 		
-		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, actionsToGoal, statesToGoal, finalCost, finalDepth, strategyToUse, n_nodes, executionTime);
+		Persistence.Broker.writeFile(filename,initialState.getField(), infoarray, newPosition, actionsToGoal, nodesToGoal, strategyToUse, n_nodes, executionTime);
 	}
 	 
 	 /*************************************************************************************************************

@@ -1,6 +1,7 @@
 package Persistence;
 import java.util.*;
 
+import Domain.Node;
 import Domain.State;
 import Exceptions.*;
 
@@ -86,7 +87,7 @@ public class Broker {
 	 * @param actions: an array containing the possible actions in String format
 	 * @throws IOException: on undetermined error while writing.
 	 ***************************************************************************************************************/
-	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, State[] states, int cost, int depth, String strategy, int n_nodes, long executionTime) throws IOException{
+	public static void writeFile(String newfilename,byte[][] initialfield, byte[] infoarray,byte[] newPosition, String[] actions, Node[] nodes, String strategy, int n_nodes, long executionTime) throws IOException{
 		int columns=infoarray[5];
 		int rows = infoarray[4];
 		int lines= rows+1;
@@ -115,17 +116,18 @@ public class Broker {
 			for (int i=0; i<actions.length; i++) {
 				writer.println(actions[i]);
 				
-				for (byte j=0; j<states[0].getField().length; j++) {
-					for (byte h=0; h<states[0].getField()[j].length; h++) {
-						temporalRow += states[i].getPosition(j, h)+" ";
+				for (byte j=0; j<nodes[0].getState().getField().length; j++) {
+					for (byte h=0; h<nodes[0].getState().getField()[j].length; h++) {
+						temporalRow += nodes[i].getState().getPosition(j, h)+" ";
 					}
 					writer.println(temporalRow);
 					temporalRow="";
 				}
+				writer.println("Value: "+nodes[i].getValue()+", Cost: "+ nodes[i].getCost()+", Depth: "+nodes[i].getDepth()+".");
 			}
 			writer.println();
 			writer.println("********Execution Statistics********");
-			writer.println("Total cost to reach solution: "+cost+", Depth of the solution: "+depth);
+			writer.println("Total cost to reach solution: "+nodes[nodes.length-1].getCost()+", Depth of the solution: "+nodes[nodes.length-1].getDepth());
 			writer.println("Number of nodes explored: "+n_nodes+", Execution Time: "+executionTime+" ns ("+executionTime/1000000000.0+" s).");
 			writer.println("Solution found with strategy: "+strategy+".");
 		}else {
