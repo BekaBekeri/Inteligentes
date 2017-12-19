@@ -8,7 +8,7 @@ import java.util.Scanner;
  * Class Description: Class encharged of presenting the main interface to the user
  * @author Beka Bekeri -, Alvaro Guerrero del Pozo, Fernando Vallejo Banegas
  * Release Date: 29-11-2017
- * @version 5.2.0
+ * @version 5.2.1
  *********************************************************************************/
 public class MainPresentation {
 
