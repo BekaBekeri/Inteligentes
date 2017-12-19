@@ -158,14 +158,17 @@ public class Control {
 			}
 	    }
 	    
-	    //Exam December 1
-	    if (currentNode.getState().getTractorX() == 0 && currentNode.getState().getTractorY()==1) {
+	    /************************************************************
+	     * Code used for exercise 2 of December, first exam
+	     * if (currentNode.getState().getTractorX() == 0 && currentNode.getState().getTractorY()==1) {
 	    	System.out.println();
 	    	System.out.println("Possible actions at position 0,1:");
 	    	for (int i=0; i< actionList.size(); i++) {
 	    		System.out.println(actionList.get(i).toString(currentNode.getState()));
 	    	}
 	    }
+	     *********************************************************************/
+	    
 	    
 		return actionList;
 	}
